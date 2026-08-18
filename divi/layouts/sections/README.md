@@ -108,8 +108,15 @@ The layouts are written in the classic 4.27.4 portability format and Divi 5
 through that conversion. **The five spares have not.** They are built from
 the same modules and attributes as the page - which is evidence, not proof.
 
-Also untested: whether these import into **Divi → Divi Library** as
-reusable items. They are page layouts, not library exports.
+The Divi Library question is answered, and the answer is no. A library
+import wants `"context": "et_builder_layouts"`, a WordPress-post-shaped
+object per layout whose `post_content` is already Divi 5 block markup
+(`<!-- wp:divi/section … -->`), plus a `terms` array for the builder's
+library pickers. These files are page-portability exports carrying 4.x
+shortcode, so the Library importer is not their door - the builder's
+↑↓ on a page is. Source: the community-maintained Divi 5 notes at
+16wells.github.io/divi-docs (`internals/library-import-json`), verified
+there 2026-03-17. Reverse-engineered, not Elegant Themes official.
 
 If an import goes sideways, the exact importer message is the useful thing
 to report.
