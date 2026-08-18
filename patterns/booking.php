@@ -28,7 +28,7 @@
 	<!-- wp:buttons {"className":"h-cta-row tod-reveal","layout":{"type":"flex"}} -->
 	<div class="wp-block-buttons h-cta-row tod-reveal">
 		<!-- wp:button {"className":"h-btn-wp"} -->
-		<div class="wp-block-button h-btn-wp"><a class="wp-block-button__link wp-element-button" href="mailto:glitta@example.com">Mail Glitta</a></div>
+		<div class="wp-block-button h-btn-wp"><a class="wp-block-button__link wp-element-button" href="mailto:booking@glitta.rocks">Mail Glitta</a></div>
 		<!-- /wp:button -->
 
 		<!-- wp:button {"className":"h-btn-ghost-wp"} -->
@@ -38,7 +38,7 @@
 	<!-- /wp:buttons -->
 
 	<!-- wp:paragraph {"className":"h-note"} -->
-	<p class="h-note">Replace glitta@example.com with the real address. A form plugin can live here later - fields in this section wear the night look automatically.</p>
+	<p class="h-note">Booking mail goes to booking@glitta.rocks. A form plugin can live here later - fields in this section wear the night look automatically.</p>
 	<!-- /wp:paragraph -->
 </section>
 <!-- /wp:group -->
