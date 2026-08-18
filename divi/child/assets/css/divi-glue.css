@@ -167,6 +167,12 @@
 
 #et-top-navigation .mobile_menu_bar:before { color: var(--sun); }
 
+/* pages that carry the night need no Divi page title above the hero */
+#main-content:has(.tod-artist, .et_pb_section.h-section) .entry-title,
+#left-area:has(.tod-artist, .et_pb_section.h-section) .entry-title {
+  display: none;
+}
+
 /* Divi's own dividers stay out of the night */
 .et_pb_section.tod-artist .et_pb_top_inside_divider,
 .et_pb_section.tod-artist .et_pb_bottom_inside_divider,
