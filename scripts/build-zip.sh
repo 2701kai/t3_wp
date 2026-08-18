@@ -6,6 +6,9 @@
 # out of git but ARE packed into the zip, so the installed theme carries them.
 set -e
 cd "$(dirname "$0")/.."
+if [ -n "$(git status --porcelain)" ]; then
+	echo "WARNING: working tree has uncommitted changes - the zip is built from HEAD and will NOT contain them." >&2
+fi
 git archive --format=zip --prefix=tod-pink/ -o tod-pink.zip HEAD
 python3 - <<'EOF'
 import glob, os, zipfile
