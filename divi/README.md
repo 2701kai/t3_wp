@@ -15,6 +15,11 @@ divi/layouts/
   g2-record.json               Gitta's turntable page, converted from the
                                standalone g2.html - prose in text modules,
                                the deck in one code module
+divi/tod-pink-global-variables.json
+                               the night's palette and type scale as Divi 5
+                               Global Variables, generated from tod.css -
+                               the builder's colour picker then offers Sun
+                               and Ember instead of an arbitrary wheel
 ```
 
 ## Install
