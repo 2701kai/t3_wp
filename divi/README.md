@@ -12,6 +12,9 @@ divi/layouts/
                                modules, our CSS classes riding on them
   sections/                    the same page cut into one file per section,
                                plus five spares - import them one at a time
+  g2-record.json               Gitta's turntable page, converted from the
+                               standalone g2.html - prose in text modules,
+                               the deck in one code module
 ```
 
 ## Install
