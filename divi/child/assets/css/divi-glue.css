@@ -1,0 +1,116 @@
+/* ============================================================
+   t.o.d. pink - Divi glue.
+   tod.css carries the night; this file makes Divi's wrappers
+   (.et_pb_section / .et_pb_row / modules) step out of the way and
+   lets the same classes work when they ride on Divi modules.
+   ============================================================ */
+
+/* the page canvas wears the night (body background comes from tod.css) */
+#page-container,
+#main-content,
+#et-main-area {
+  background-color: transparent;
+  color: var(--cream);
+}
+
+/* ---------- our sections keep their own rhythm ---------- */
+
+.et_pb_section.tod-artist,
+.et_pb_section.h-section,
+.et_pb_section.h-finale {
+  background-color: transparent;
+}
+
+.et_pb_section.tod-artist { padding: 0; }
+
+.et_pb_section.h-section {
+  padding: clamp(4rem, 10vh, 7rem) var(--pad);
+  max-width: 72rem;
+  margin: 0 auto;
+  display: grid;
+  gap: 2.2rem;
+}
+
+.et_pb_section.h-finale {
+  margin-top: clamp(4rem, 10vh, 7rem);
+  padding: clamp(6rem, 16vh, 10rem) var(--pad) clamp(4rem, 10vh, 6rem);
+  background: var(--finale-grad);
+  text-align: center;
+}
+
+/* rows inside our sections: full width, no extra padding */
+.et_pb_section.tod-artist .et_pb_row,
+.et_pb_section.h-section .et_pb_row,
+.et_pb_section.h-finale .et_pb_row {
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* the hero row is the artist column from the block theme */
+.et_pb_row.tod-artist-main { margin: 0 auto; }
+
+/* text modules: no trailing margins, inherit the night's type */
+.et_pb_section.tod-artist .et_pb_text,
+.et_pb_section.h-section .et_pb_text,
+.et_pb_section.h-finale .et_pb_text {
+  margin-bottom: 0;
+  font-family: inherit;
+  color: inherit;
+}
+
+/* set cards ride on Divi columns */
+.et_pb_column.h-set { margin-bottom: 1.2rem; }
+.et_pb_column.h-set .et_pb_module { margin-bottom: 0.8rem; }
+.et_pb_column.h-set iframe { display: block; width: 100%; border: 0; border-radius: 3px; }
+
+/* image module as the tilted portrait */
+.et_pb_image.tod-artist-figure { margin: 0.5rem auto 0; }
+.et_pb_image.tod-artist-figure img { display: block; width: 100%; height: auto; }
+
+/* ---------- gallery module in the night frame ---------- */
+
+.h-gallery-divi .et_pb_gallery_item {
+  border: 1px solid var(--line-h);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--coal-2);
+  position: relative;
+}
+
+/* faint CRT scanlines, the draft's trick */
+.h-gallery-divi .et_pb_gallery_item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, rgb(var(--coal-rgb) / 0.12) 0 1px, transparent 1px 4px);
+  pointer-events: none;
+}
+
+.h-gallery-divi .et_pb_gallery_image img { display: block; width: 100%; }
+
+.h-gallery-divi .et_pb_gallery_title {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.12em;
+  color: var(--cream-dim);
+  margin: 0.4rem 0.2rem;
+}
+
+.h-gallery-divi .et_pb_gallery_title::before { content: "▸ "; color: var(--ember); }
+
+/* ---------- small resets so Divi defaults don't fight the look ---------- */
+
+/* neon pill links inside text modules keep their glow on hover */
+.et_pb_text .h-btn,
+.et_pb_text .h-btn:hover { text-decoration: none; }
+
+/* date rows as standalone text modules: each carries its own line */
+.et_pb_text .tod-date { border-top: 1px solid var(--line-h); }
+
+/* Divi's own dividers stay out of the night */
+.et_pb_section.tod-artist .et_pb_top_inside_divider,
+.et_pb_section.tod-artist .et_pb_bottom_inside_divider,
+.et_pb_section.h-finale .et_pb_top_inside_divider,
+.et_pb_section.h-finale .et_pb_bottom_inside_divider { display: none; }

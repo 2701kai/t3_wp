@@ -1,6 +1,7 @@
-# Kept out of the theme zip that scripts/build-zip.sh produces —
-# repo docs and tooling, not theme files.
+# Kept out of the theme zip that scripts/build-zip.sh produces -
+# repo docs, tooling and the Divi edition, not block theme files.
 README.md export-ignore
 scripts export-ignore
+divi export-ignore
 .gitattributes export-ignore
 .gitignore export-ignore
