@@ -48,8 +48,22 @@
   margin: 0;
 }
 
-/* the hero row is the artist column from the block theme */
-.et_pb_row.tod-artist-main { margin: 0 auto; }
+/* the hero row is the artist column from the block theme - it keeps its
+   own geometry (the generic full-width row rule above must not win) */
+.et_pb_section.tod-artist .et_pb_row.tod-artist-main {
+  display: block;
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: clamp(4.5rem, 12vh, 7rem) var(--pad) clamp(3rem, 9vh, 6rem);
+  text-align: center;
+}
+
+.et_pb_section.tod-artist .et_pb_text { text-align: center; }
+.et_pb_section.tod-artist .tod-wave { justify-content: center; }
+
+/* an image module without a chosen image stays invisible (no ghost glow
+   box) - the module is still there in the builder to click and fill */
+.et_pb_image.tod-artist-figure:has(img[src=""]) { display: none; }
 
 /* text modules: no trailing margins, inherit the night's type */
 .et_pb_section.tod-artist .et_pb_text,
@@ -108,6 +122,31 @@
 
 /* date rows as standalone text modules: each carries its own line */
 .et_pb_text .tod-date { border-top: 1px solid var(--line-h); }
+
+/* ---------- Divi's own header, dressed for the night ----------
+   Best: give the Glitta page the Blank Page template and use the neon
+   nav module in the layout. If Divi's header stays, it at least wears
+   the night instead of daylight white. */
+
+#main-header,
+#top-header {
+  background: linear-gradient(rgb(var(--coal-rgb) / 0.95), rgb(var(--coal-rgb) / 0.8)) !important;
+  box-shadow: none !important;
+}
+
+#top-menu a,
+#et-top-navigation a {
+  color: var(--cream-dim);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+#top-menu a:hover,
+#et-top-navigation a:hover { color: var(--uvy); opacity: 1; }
+
+#et-top-navigation .mobile_menu_bar:before { color: var(--sun); }
 
 /* Divi's own dividers stay out of the night */
 .et_pb_section.tod-artist .et_pb_top_inside_divider,
