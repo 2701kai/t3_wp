@@ -61,9 +61,19 @@
 .et_pb_section.tod-artist .et_pb_text { text-align: center; }
 .et_pb_section.tod-artist .tod-wave { justify-content: center; }
 
+/* width-capped hero texts center their own box, not only their lines */
+.et_pb_section.tod-artist .tod-artist-intro,
+.et_pb_section.tod-artist .tod-artist-caption,
+.et_pb_section.tod-artist .tod-artist-note {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* an image module without a chosen image stays invisible (no ghost glow
-   box) - the module is still there in the builder to click and fill */
-.et_pb_image.tod-artist-figure:has(img[src=""]) { display: none; }
+   box). Matches an empty src attribute, a missing src and a module with
+   no img at all - Divi renders each variant depending on context. The
+   module stays reachable in the builder via hover and the layers panel. */
+.et_pb_image.tod-artist-figure:not(:has(img[src]:not([src=""]))) { display: none; }
 
 /* text modules: no trailing margins, inherit the night's type */
 .et_pb_section.tod-artist .et_pb_text,
@@ -119,6 +129,15 @@
 /* neon pill links inside text modules keep their glow on hover */
 .et_pb_text .h-btn,
 .et_pb_text .h-btn:hover { text-decoration: none; }
+
+/* genre pills: Divi's text-module list styling stays out (no bullets) */
+.et_pb_text ul.h-genres {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.et_pb_text ul.h-genres li { list-style: none; }
+.et_pb_text ul.h-genres li::marker { content: none; }
 
 /* date rows as standalone text modules: each carries its own line */
 .et_pb_text .tod-date { border-top: 1px solid var(--line-h); }
