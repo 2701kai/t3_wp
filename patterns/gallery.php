@@ -1,9 +1,9 @@
 <?php
 /**
- * Title: Gallery — Pictures from the Night
+ * Title: Gallery - Pictures from the Night
  * Slug: tod-pink/gallery
  * Categories: tod-pink
- * Description: A gallery block in the night frame — tiles with CRT scanlines, captions in Space Mono.
+ * Description: A gallery block in the night frame - tiles with CRT scanlines, captions in Space Mono.
  * Viewport Width: 1400
  */
 ?>
@@ -26,7 +26,7 @@
 	<!-- /wp:gallery -->
 
 	<!-- wp:paragraph {"className":"h-note"} -->
-	<p class="h-note">Add photos via the media library — and only pictures whose rights are cleared. The curtain principle applies here too.</p>
+	<p class="h-note">Add photos via the media library - and only pictures whose rights are cleared. The curtain principle applies here too.</p>
 	<!-- /wp:paragraph -->
 </section>
 <!-- /wp:group -->

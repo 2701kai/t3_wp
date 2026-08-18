@@ -1,8 +1,8 @@
 /* ============================================================
-   t.o.d. pink — Glitta
+   t.o.d. pink - Glitta
    Ported from titisondecks.com/pink (t2: styles/home.css pink
    tokens over the shared sections, styles/site.css base).
-   One palette only — the pink & purple night:
+   One palette only - the pink & purple night:
    --coal   #08041a  void indigo (the night)
    --sun    #ff3ecf  neon magenta (primary accent)
    --ember  #8a5cff  UV violet
@@ -11,7 +11,7 @@
    --wick   #ffb32e  amber (rare warm pop)
    --cream  #f0e9ff  violet-biased near-white (text)
    Type: EMOTIQ → Audiowide (display) / Sora (body) / Space Mono (data).
-   EMOTIQ (© Enxyclo, license pending) is not bundled — the stack
+   EMOTIQ (© Enxyclo, license pending) is not bundled - the stack
    lists it first anyway: drop EMOTIQ.woff2 into assets/fonts/ and
    functions.php registers the face, nothing else to change.
    Audiowide (OFL, embedded) is the built-in stand-in; Monoton stays
@@ -136,7 +136,7 @@ h1, h2, h3 { text-wrap: balance; }
 .h-nav-links a { color: var(--cream-dim); text-decoration: none; padding: 0.2rem 0; }
 .h-nav-links a:hover { color: var(--uvy); text-shadow: 0 0 12px rgb(var(--uvy-rgb) / 0.7); }
 
-/* ---------- hero — the artist page (Anja-layout, Glitta's name) ---------- */
+/* ---------- hero - the artist page (Anja-layout, Glitta's name) ---------- */
 
 .tod-artist {
   position: relative;
@@ -672,7 +672,7 @@ h1, h2, h3 { text-wrap: balance; }
   box-shadow: 0 0 18px rgb(var(--sun-rgb) / 0.25), inset 0 0 12px rgb(var(--sun-rgb) / 0.1);
 }
 
-/* ---------- finale — night → dawn ---------- */
+/* ---------- finale - night → dawn ---------- */
 
 .h-finale {
   margin-top: clamp(4rem, 10vh, 7rem);
@@ -742,7 +742,7 @@ h1, h2, h3 { text-wrap: balance; }
 .h-river-inner a { color: inherit; }
 
 /* ============================================================
-   Effects — activated by tod.js (html gets .tod-js). Without JS
+   Effects - activated by tod.js (html gets .tod-js). Without JS
    nothing is ever hidden; with reduced motion everything rests.
    ============================================================ */
 
@@ -768,7 +768,7 @@ html.tod-js .tod-split.is-on .tod-char {
 }
 
 /* scroll-into-view fade + rise (Reveal). Uses `translate`, not
-   `transform`, so a card can be .tod-reveal and .tod-tilt at once —
+   `transform`, so a card can be .tod-reveal and .tod-tilt at once -
    the tilt owns transform, the reveal owns translate. */
 html.tod-js .tod-reveal {
   opacity: 0;
@@ -801,7 +801,7 @@ html.tod-js .tod-tilt {
   background: radial-gradient(230px circle at var(--gx, 50%) var(--gy, 50%), rgba(240, 233, 255, 0.13), transparent 65%);
 }
 
-/* light sweep across text (ShinyText) — pure CSS */
+/* light sweep across text (ShinyText) - pure CSS */
 .shiny {
   background: linear-gradient(120deg, currentcolor 38%, #ffffff 50%, currentcolor 62%);
   background-size: 220% 100%;

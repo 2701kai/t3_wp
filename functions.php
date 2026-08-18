@@ -1,6 +1,6 @@
 <?php
 /**
- * t.o.d. pink — Glitta. Block theme setup: styles, effects, patterns.
+ * t.o.d. pink - Glitta. Block theme setup: styles, effects, patterns.
  *
  * @package tod-pink
  */
@@ -49,7 +49,7 @@ function tod_pink_editor_setup() {
 add_action( 'after_setup_theme', 'tod_pink_editor_setup' );
 
 /**
- * EMOTIQ drop-in. The display stack is 'EMOTIQ', 'Audiowide', … — EMOTIQ
+ * EMOTIQ drop-in. The display stack is 'EMOTIQ', 'Audiowide', … - EMOTIQ
  * itself is never bundled (© Enxyclo Studio, license pending). The moment
  * a licensed file lands in assets/fonts/ (EMOTIQ.woff2, .woff, .otf or
  * .ttf, any capitalization), this registers its @font-face on the front
@@ -95,7 +95,7 @@ function tod_pink_pattern_category() {
 		'tod-pink',
 		array(
 			'label'       => __( 't.o.d. pink', 'tod-pink' ),
-			'description' => __( 'Sections of the TiTis on Decks night — hero, story, sets, dates, gallery, booking, finale.', 'tod-pink' ),
+			'description' => __( 'Sections of the TiTis on Decks night - hero, story, sets, dates, gallery, booking, finale.', 'tod-pink' ),
 		)
 	);
 }

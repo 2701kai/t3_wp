@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Story — Who I Am
+ * Title: Story - Who I Am
  * Slug: tod-pink/story
  * Categories: tod-pink
  * Description: Quote on the left, copy on the right, genres as neon pills below.
@@ -30,7 +30,7 @@
 		<!-- wp:group {"className":"h-copy","layout":{"type":"default"}} -->
 		<div class="wp-block-group h-copy">
 			<!-- wp:paragraph -->
-			<p>With <strong>Lutzi</strong> I founded <strong>TiTis on Decks</strong> — a female DJ collective born in the Algarve night. This page is my own side of that story.</p>
+			<p>With <strong>Lutzi</strong> I founded <strong>TiTis on Decks</strong> - a female DJ collective born in the Algarve night. This page is my own side of that story.</p>
 			<!-- /wp:paragraph -->
 
 			<!-- wp:paragraph -->

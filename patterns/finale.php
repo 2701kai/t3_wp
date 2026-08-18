@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Finale — Night Turns Morning
+ * Title: Finale - Night Turns Morning
  * Slug: tod-pink/finale
  * Categories: tod-pink
  * Description: The sunrise gradient at the end: from void indigo through UV violet into warm light, with the neon title.
@@ -20,7 +20,7 @@
 		<!-- /wp:heading -->
 
 		<!-- wp:paragraph {"className":"h-finale-sub"} -->
-		<p class="h-finale-sub">The night doesn't end — it only gets brighter. Thank you for scrolling all the way down.</p>
+		<p class="h-finale-sub">The night doesn't end - it only gets brighter. Thank you for scrolling all the way down.</p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph {"className":"h-finale-links"} -->

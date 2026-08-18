@@ -1,4 +1,4 @@
-/* t.o.d. pink — Glitta. The t2 animation ingredients without React:
+/* t.o.d. pink - Glitta. The t2 animation ingredients without React:
    Spores (canvas drift), SplitText (neon flicker-on), Reveal (scroll
    fade + rise), TiltCard (pointer tilt + glare), Waveform (equalizer).
    Everything rests under prefers-reduced-motion: the html never gets
@@ -121,7 +121,7 @@
   }
 
   /* ---------- Spores: ambient particles drifting up through the hero ----------
-     Straight port of t2's Spores.jsx — canvas, sized to its host,
+     Straight port of t2's Spores.jsx - canvas, sized to its host,
      paused when the tab is hidden. Default colors ARE the pink night. */
 
   function initSpores() {

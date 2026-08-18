@@ -1,9 +1,9 @@
 <?php
 /**
- * Title: Hero — Name & Portrait
+ * Title: Hero - Name & Portrait
  * Slug: tod-pink/hero
  * Categories: tod-pink
- * Description: The opening in the Anja layout: kicker, neon name, tilted portrait, intro — with spores, lasers and the living equalizer.
+ * Description: The opening in the Anja layout: kicker, neon name, tilted portrait, intro - with spores, lasers and the living equalizer.
  * Viewport Width: 1400
  */
 ?>
@@ -35,7 +35,7 @@
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph {"className":"tod-artist-intro tod-reveal"} -->
-		<p class="tod-artist-intro tod-reveal">Different sounds. Different characters. One shared frequency — and this one is mine.</p>
+		<p class="tod-artist-intro tod-reveal">Different sounds. Different characters. One shared frequency - and this one is mine.</p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:html -->

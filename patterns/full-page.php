@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Glitta — The Whole Page
+ * Title: Glitta - The Whole Page
  * Slug: tod-pink/full-page
  * Categories: tod-pink
  * Description: Every section in one go: hero, story, sets, dates, gallery, booking, finale. Offered as a starter layout when creating a new page.

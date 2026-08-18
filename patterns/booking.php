@@ -1,9 +1,9 @@
 <?php
 /**
- * Title: Booking — Contact
+ * Title: Booking - Contact
  * Slug: tod-pink/booking
  * Categories: tod-pink
- * Description: The contact section: intro, neon buttons for mail and SoundCloud. A form plugin can move in here later — it inherits the night look.
+ * Description: The contact section: intro, neon buttons for mail and SoundCloud. A form plugin can move in here later - it inherits the night look.
  * Viewport Width: 1400
  */
 ?>
@@ -22,7 +22,7 @@
 	<!-- /wp:group -->
 
 	<!-- wp:paragraph {"className":"tod-booking-intro tod-reveal"} -->
-	<p class="tod-booking-intro tod-reveal">Floor, date, vibe — tell me what you're planning and I'll bring the sound. An inquiry costs nothing but a message.</p>
+	<p class="tod-booking-intro tod-reveal">Floor, date, vibe - tell me what you're planning and I'll bring the sound. An inquiry costs nothing but a message.</p>
 	<!-- /wp:paragraph -->
 
 	<!-- wp:buttons {"className":"h-cta-row tod-reveal","layout":{"type":"flex"}} -->
@@ -38,7 +38,7 @@
 	<!-- /wp:buttons -->
 
 	<!-- wp:paragraph {"className":"h-note"} -->
-	<p class="h-note">Replace glitta@example.com with the real address. A form plugin can live here later — fields in this section wear the night look automatically.</p>
+	<p class="h-note">Replace glitta@example.com with the real address. A form plugin can live here later - fields in this section wear the night look automatically.</p>
 	<!-- /wp:paragraph -->
 </section>
 <!-- /wp:group -->

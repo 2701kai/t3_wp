@@ -1,9 +1,9 @@
 <?php
 /**
- * Title: Sets — SoundCloud
+ * Title: Sets - SoundCloud
  * Slug: tod-pink/sets
  * Categories: tod-pink
- * Description: Set cards with SoundCloud embeds. New set = duplicate a card, swap the link — WordPress builds the player by itself.
+ * Description: Set cards with SoundCloud embeds. New set = duplicate a card, swap the link - WordPress builds the player by itself.
  * Viewport Width: 1400
  */
 ?>
@@ -66,7 +66,7 @@
 	<!-- /wp:paragraph -->
 
 	<!-- wp:paragraph {"className":"h-note"} -->
-	<p class="h-note">New set? Duplicate a card, paste the SoundCloud link — WordPress builds the player by itself.</p>
+	<p class="h-note">New set? Duplicate a card, paste the SoundCloud link - WordPress builds the player by itself.</p>
 	<!-- /wp:paragraph -->
 </section>
 <!-- /wp:group -->

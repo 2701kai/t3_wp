@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Dates — Where the Dancing Is
+ * Title: Dates - Where the Dancing Is
  * Slug: tod-pink/dates
  * Categories: tod-pink
  * Description: Upcoming dates as rows: date in cyan, title, place. New date = duplicate a row.
@@ -58,7 +58,7 @@
 	<!-- /wp:group -->
 
 	<!-- wp:paragraph {"className":"h-note"} -->
-	<p class="h-note">New date: duplicate a row (⋮ → Duplicate), swap the texts. Past nights: delete them — or keep them as an archive.</p>
+	<p class="h-note">New date: duplicate a row (⋮ → Duplicate), swap the texts. Past nights: delete them - or keep them as an archive.</p>
 	<!-- /wp:paragraph -->
 </section>
 <!-- /wp:group -->
