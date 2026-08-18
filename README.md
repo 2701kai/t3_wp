@@ -79,7 +79,8 @@ The same night also exists as a **Divi child theme + Divi Builder layout**
 for sites that run Divi (Elegant Themes, commercial, not bundled) - see
 [`divi/README.md`](divi/README.md). Build its zip with
 `sh scripts/build-divi-zip.sh`; the layout to import lives in
-`divi/layouts/glitta-the-whole-page.json`. Pick one edition per site.
+`divi/layouts/glitta-the-whole-page.json`, single sections in
+`divi/layouts/sections/`. Pick one edition per site.
 
 ## Derivation notes (t2 → WordPress)
 
