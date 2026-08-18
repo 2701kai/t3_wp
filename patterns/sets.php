@@ -3,7 +3,7 @@
  * Title: Sets — SoundCloud
  * Slug: tod-pink/sets
  * Categories: tod-pink
- * Description: Set-Karten mit SoundCloud-Einbettung. Neues Set = Karte duplizieren, Link tauschen — WordPress bettet SoundCloud von selbst ein.
+ * Description: Set cards with SoundCloud embeds. New set = duplicate a card, swap the link — WordPress builds the player by itself.
  * Viewport Width: 1400
  */
 ?>
@@ -12,11 +12,11 @@
 	<!-- wp:group {"className":"h-head tod-reveal","layout":{"type":"default"}} -->
 	<div class="wp-block-group h-head tod-reveal">
 		<!-- wp:paragraph {"className":"h-kicker"} -->
-		<p class="h-kicker">Der Sound</p>
+		<p class="h-kicker">The Sound</p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:heading {"className":"h-h2"} -->
-		<h2 class="wp-block-heading h-h2">Sets, die die Nacht <em>tragen</em></h2>
+		<h2 class="wp-block-heading h-h2">Sets that carry the <em>night</em></h2>
 		<!-- /wp:heading -->
 	</div>
 	<!-- /wp:group -->
@@ -48,7 +48,7 @@
 			<!-- /wp:paragraph -->
 
 			<!-- wp:heading {"level":3,"className":"h-set-title"} -->
-			<h3 class="wp-block-heading h-set-title">WONDERLAND Market, Mai 2026</h3>
+			<h3 class="wp-block-heading h-set-title">WONDERLAND Market, May 2026</h3>
 			<!-- /wp:heading -->
 
 			<!-- wp:embed {"url":"https://soundcloud.com/glittawicca/wonderland-spring-market-may","type":"rich","providerNameSlug":"soundcloud","responsive":true} -->
@@ -66,7 +66,7 @@
 	<!-- /wp:paragraph -->
 
 	<!-- wp:paragraph {"className":"h-note"} -->
-	<p class="h-note">Neues Set? Karte duplizieren, SoundCloud-Link einsetzen — den Player baut WordPress von selbst.</p>
+	<p class="h-note">New set? Duplicate a card, paste the SoundCloud link — WordPress builds the player by itself.</p>
 	<!-- /wp:paragraph -->
 </section>
 <!-- /wp:group -->

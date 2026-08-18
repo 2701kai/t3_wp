@@ -1,9 +1,9 @@
 <?php
 /**
- * Title: Finale — Nacht wird Morgen
+ * Title: Finale — Night Turns Morning
  * Slug: tod-pink/finale
  * Categories: tod-pink
- * Description: Der Sonnenaufgangs-Verlauf zum Schluss: vom Void-Indigo über UV-Violett ins warme Licht, mit Neon-Titel.
+ * Description: The sunrise gradient at the end: from void indigo through UV violet into warm light, with the neon title.
  * Viewport Width: 1400
  */
 ?>
@@ -12,7 +12,7 @@
 	<!-- wp:group {"className":"h-finale-inner","layout":{"type":"default"}} -->
 	<div class="wp-block-group h-finale-inner">
 		<!-- wp:paragraph {"className":"h-finale-kicker"} -->
-		<p class="h-finale-kicker">Bis zum Morgen</p>
+		<p class="h-finale-kicker">Until morning</p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:heading {"className":"h-finale-title tod-split"} -->
@@ -20,11 +20,11 @@
 		<!-- /wp:heading -->
 
 		<!-- wp:paragraph {"className":"h-finale-sub"} -->
-		<p class="h-finale-sub">Die Nacht endet nicht — sie wird nur heller. Danke, dass du bis hierher gescrollt hast.</p>
+		<p class="h-finale-sub">The night doesn't end — it only gets brighter. Thank you for scrolling all the way down.</p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph {"className":"h-finale-links"} -->
-		<p class="h-finale-links"><a href="https://soundcloud.com/glittawicca">SoundCloud</a> <a href="https://soundcloud.com/titisondecks">TiTis on Decks</a> <a href="#kontakt">Booking</a></p>
+		<p class="h-finale-links"><a href="https://soundcloud.com/glittawicca">SoundCloud</a> <a href="https://soundcloud.com/titisondecks">TiTis on Decks</a> <a href="#contact">Booking</a></p>
 		<!-- /wp:paragraph -->
 	</div>
 	<!-- /wp:group -->

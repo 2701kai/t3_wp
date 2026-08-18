@@ -8,36 +8,53 @@ so Glitta edits every text, photo, set and date herself in wp-admin.
 
 The hero follows the `/anja` featured-artist layout (kicker → flickering
 name → tilted portrait → intro); the sections below it are the `/pink`
-home page: Story, Sets, Termine, Galerie, Booking, Finale.
+home page: Story, Sets, Dates, Gallery, Booking, Finale. Default content
+language is English — every word is editable, so any language works.
 
 ## Install
 
 1. Build the zip: `sh scripts/build-zip.sh` → `tod-pink.zip`
-   (or download the repo zip from GitHub and rename the inner folder to `tod-pink`).
-2. In wp-admin: **Design → Themes → Hinzufügen → Theme hochladen** → `tod-pink.zip` → aktivieren.
-3. **Seiten → Erstellen**: WordPress offers the starter layout
-   **»Glitta — die ganze Seite«** — pick it, title the page »Glitta«, publish.
-4. **Einstellungen → Lesen**: »Eine statische Seite« → homepage = »Glitta«.
+   (licensed fonts placed in `assets/fonts/` are packed in automatically).
+2. In wp-admin: **Appearance → Themes → Add New → Upload Theme** → `tod-pink.zip` → activate.
+3. **Pages → Add New**: WordPress offers the starter layout
+   **»Glitta — The Whole Page«** — pick it, title the page »Glitta«, publish.
+4. **Settings → Reading**: »A static page« → homepage = »Glitta«.
 
 Requires WordPress 6.5+ (any normal hosting with custom-theme upload;
 WordPress.com only on the plan tier that allows theme uploads).
 
-## Für Glitta — so pflegst du die Seite
+## Fonts — EMOTIQ and its stand-in
 
-Alles passiert auf deiner Seite »Glitta« (Seiten → Glitta → Bearbeiten):
+The display stack is **`'EMOTIQ', 'Audiowide', 'Monoton', …`**:
 
-- **Texte**: anklicken, drüberschreiben. Fertig.
-- **Dein Porträt**: das leere Bild im Hero anklicken → Mediathek → Foto wählen.
-- **Fotos**: im Abschnitt »Momente« auf die Galerie klicken und Bilder aus
-  der Mediathek hinzufügen — Captions erscheinen automatisch im Nacht-Look.
-- **Neues Set**: im Abschnitt »Der Sound« eine Set-Karte anklicken →
-  ⋮ → Duplizieren → SoundCloud-Link im Einbettungsblock tauschen.
-  Den Player baut WordPress von selbst.
-- **Neues Date**: im Abschnitt »Termine« eine Zeile duplizieren, Texte tauschen.
-- **Booking-Adresse**: im Kontakt-Abschnitt steckt noch `glitta@example.com`
-  im Mail-Button — durch die echte Adresse ersetzen.
-- Einzelne Abschnitte lassen sich auch neu einfügen: Block-Inserter →
-  Kategorie **»t.o.d. pink«**.
+- **Audiowide** (OFL, embedded as a data URI) is the built-in default —
+  the closest free match to EMOTIQ's wide, rounded techno caps.
+- **EMOTIQ** (© Enxyclo Studio) is *not* bundled — t2 only holds its demo
+  cut and the license is still pending. The moment a licensed file lands in
+  **`assets/fonts/`** as `EMOTIQ.woff2` / `.woff` / `.otf` / `.ttf`,
+  `functions.php` detects it and the whole site — front end and editor —
+  switches to the real thing. Nothing else to configure.
+- Font binaries in `assets/fonts/` stay out of git (public repo); the zip
+  build packs them in, so an installed theme carries the licensed font.
+- Note: installing EMOTIQ into your *operating system's* fonts only changes
+  what **you** see locally — visitors need the webfont via the drop-in above.
+- Sora (body) and Space Mono (labels) are embedded too — the site makes no
+  external font requests at all (GDPR-clean, works offline in the woods).
+
+## For Glitta — running the page
+
+Everything happens on the »Glitta« page (Pages → Glitta → Edit):
+
+- **Texts**: click, type over, done.
+- **Your portrait**: click the empty image in the hero → media library.
+- **Photos**: click the gallery in »Moments« and add images from the
+  media library — captions get the night look automatically.
+- **New set**: in »The Sound«, click a set card → ⋮ → Duplicate → swap the
+  SoundCloud link in the embed block. WordPress builds the player itself.
+- **New date**: in »Dates«, duplicate a row, swap the texts.
+- **Booking address**: the mail button still holds `glitta@example.com` —
+  replace it with the real address.
+- Sections can also be inserted fresh: block inserter → category **»t.o.d. pink«**.
 
 ## What's inside
 
@@ -48,8 +65,8 @@ templates/             front-page, page, index (header · content · footer)
 parts/                 header (fixed neon nav), footer (credit river)
 patterns/              hero · story · sets · dates · gallery · booking ·
                        finale · full-page (starter layout for new pages)
-assets/css/fonts.css   Monoton, Sora, Space Mono — embedded as data URIs,
-                       no external requests (GDPR-clean, works offline)
+assets/css/fonts.css   Audiowide, Monoton, Sora, Space Mono — data URIs
+assets/fonts/          EMOTIQ drop-in slot (see README.txt inside)
 assets/css/tod.css     the ported night: tokens, sections, effects
 assets/js/tod.js       vanilla ports of t2's Spores, SplitText, Reveal,
                        TiltCard, Waveform — all respect prefers-reduced-motion
@@ -74,18 +91,15 @@ screenshot.png         theme card in wp-admin
 
 ## Inherited watch-outs
 
-- **EMOTIQ is not bundled.** t2 ships only the demo cut (© Enxyclo Studio,
-  license pending), so this theme's display face is Monoton — draft1's
-  original neon, fitting for the pink/purple night. Once EMOTIQ is licensed:
-  add its `@font-face` to `assets/css/fonts.css` and put `'EMOTIQ'` first in
-  `--font-display` in `assets/css/tod.css`.
 - **Photo rights** — t2 is curtained over exactly this. Only imagery with
-  cleared rights goes into the Mediathek; the shipped theme contains no photos.
+  cleared rights goes into the media library; the shipped theme contains no photos.
+- **EMOTIQ license** — see the fonts section above; buy before going loud.
 - **GPL** — the theme is GPL-2.0-or-later, like WordPress.
 
 ## Verified
 
-Smoke-tested against a real WordPress (6.x, wp-cli + SQLite) with
+Smoke-tested against a real WordPress (7.0.4, wp-cli + SQLite) with
 Playwright: patterns register, the starter layout assembles the full page,
 both SoundCloud oEmbeds resolve into players, all reveals/splits fire,
-spores + equalizer run, tilt + glare follow the pointer, no console errors.
+spores + equalizer run, tilt + glare follow the pointer, the EMOTIQ
+drop-in switches the display face, no console errors, zero editor warnings.

@@ -10,9 +10,12 @@
    --acid   #b8ff2e  acid green (rare pop)
    --wick   #ffb32e  amber (rare warm pop)
    --cream  #f0e9ff  violet-biased near-white (text)
-   Type: Monoton (neon display) / Sora (body) / Space Mono (data).
-   EMOTIQ is not bundled (license pending in t2) — once licensed,
-   add its @font-face in fonts.css and put it first in --font-display.
+   Type: EMOTIQ → Audiowide (display) / Sora (body) / Space Mono (data).
+   EMOTIQ (© Enxyclo, license pending) is not bundled — the stack
+   lists it first anyway: drop EMOTIQ.woff2 into assets/fonts/ and
+   functions.php registers the face, nothing else to change.
+   Audiowide (OFL, embedded) is the built-in stand-in; Monoton stays
+   as the last neon resort.
    ============================================================ */
 
 :root {
@@ -44,7 +47,7 @@
   --river-grad: linear-gradient(180deg, #7fb0a2, #4a7a70);
   --river-ink: #eafff7;
 
-  --font-display: 'Monoton', 'Arial Black', sans-serif;
+  --font-display: 'EMOTIQ', 'Audiowide', 'Monoton', 'Arial Black', sans-serif;
   --font-body: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
   --font-mono: 'Space Mono', 'Courier New', monospace;
 
@@ -233,6 +236,7 @@ h1, h2, h3 { text-wrap: balance; }
   font-weight: 400;
   font-size: clamp(3rem, 12vw, 6.5rem);
   line-height: 1;
+  text-transform: uppercase;
   color: var(--cream);
   margin: 0;
   text-shadow: 0 0 24px rgb(var(--sun-rgb) / 0.85), 0 0 80px rgb(var(--ember-rgb) / 0.5);
@@ -694,6 +698,7 @@ h1, h2, h3 { text-wrap: balance; }
   font-weight: 400;
   font-size: clamp(2.1rem, 7.5vw, 4.4rem);
   line-height: 1.14;
+  text-transform: uppercase;
   margin: 0;
   color: #fff;
   text-shadow: 0 0 24px rgb(var(--sun-rgb) / 0.9), 0 0 70px rgb(var(--ember-rgb) / 0.5);

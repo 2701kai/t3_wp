@@ -1,2 +1,5 @@
 tod-pink.zip
 node_modules/
+# licensed font binaries never enter the public repo — see assets/fonts/README.txt
+assets/fonts/*
+!assets/fonts/README.txt

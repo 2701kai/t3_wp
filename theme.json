@@ -32,9 +32,9 @@
 					"fontFamily": "'Space Mono', 'Courier New', monospace"
 				},
 				{
-					"name": "Monoton (Neon Display)",
+					"name": "Display (EMOTIQ → Audiowide)",
 					"slug": "display",
-					"fontFamily": "'Monoton', 'Arial Black', sans-serif"
+					"fontFamily": "'EMOTIQ', 'Audiowide', 'Monoton', 'Arial Black', sans-serif"
 				}
 			],
 			"fontSizes": [

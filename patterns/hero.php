@@ -1,9 +1,9 @@
 <?php
 /**
- * Title: Hero — Name & Porträt
+ * Title: Hero — Name & Portrait
  * Slug: tod-pink/hero
  * Categories: tod-pink
- * Description: Der Auftakt im Anja-Layout: Kicker, Neon-Name, geneigtes Porträt, Intro — mit Sporen, Lasern und Equalizer.
+ * Description: The opening in the Anja layout: kicker, neon name, tilted portrait, intro — with spores, lasers and the living equalizer.
  * Viewport Width: 1400
  */
 ?>
@@ -27,15 +27,15 @@
 		<!-- /wp:heading -->
 
 		<!-- wp:image {"sizeSlug":"large","className":"tod-artist-figure tod-tilt tod-reveal"} -->
-		<figure class="wp-block-image size-large tod-artist-figure tod-tilt tod-reveal"><img alt="Porträt von Glitta hinter den Decks"/></figure>
+		<figure class="wp-block-image size-large tod-artist-figure tod-tilt tod-reveal"><img alt="Portrait of Glitta behind the decks"/></figure>
 		<!-- /wp:image -->
 
 		<!-- wp:paragraph {"className":"tod-artist-caption"} -->
-		<p class="tod-artist-caption">hinter den Decks, irgendwo zwischen Mitternacht und Morgen</p>
+		<p class="tod-artist-caption">behind the decks, somewhere between midnight and morning</p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph {"className":"tod-artist-intro tod-reveal"} -->
-		<p class="tod-artist-intro tod-reveal">Verschiedene Sounds. Verschiedene Charaktere. Eine gemeinsame Frequenz — und das hier ist meine.</p>
+		<p class="tod-artist-intro tod-reveal">Different sounds. Different characters. One shared frequency — and this one is mine.</p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:html -->
@@ -45,11 +45,11 @@
 		<!-- wp:buttons {"className":"h-cta-row","layout":{"type":"flex","justifyContent":"center"}} -->
 		<div class="wp-block-buttons h-cta-row">
 			<!-- wp:button {"className":"h-btn-wp"} -->
-			<div class="wp-block-button h-btn-wp"><a class="wp-block-button__link wp-element-button" href="#sets">Meine Sets</a></div>
+			<div class="wp-block-button h-btn-wp"><a class="wp-block-button__link wp-element-button" href="#sets">My Sets</a></div>
 			<!-- /wp:button -->
 
 			<!-- wp:button {"className":"h-btn-ghost-wp"} -->
-			<div class="wp-block-button h-btn-ghost-wp"><a class="wp-block-button__link wp-element-button" href="#kontakt">Booking</a></div>
+			<div class="wp-block-button h-btn-ghost-wp"><a class="wp-block-button__link wp-element-button" href="#contact">Booking</a></div>
 			<!-- /wp:button -->
 		</div>
 		<!-- /wp:buttons -->

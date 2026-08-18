@@ -1,9 +1,9 @@
 <?php
 /**
- * Title: Story — Wer ich bin
+ * Title: Story — Who I Am
  * Slug: tod-pink/story
  * Categories: tod-pink
- * Description: Zitat links, Text rechts, darunter die Genres als Neon-Pillen.
+ * Description: Quote on the left, copy on the right, genres as neon pills below.
  * Viewport Width: 1400
  */
 ?>
@@ -12,11 +12,11 @@
 	<!-- wp:group {"className":"h-head tod-reveal","layout":{"type":"default"}} -->
 	<div class="wp-block-group h-head tod-reveal">
 		<!-- wp:paragraph {"className":"h-kicker"} -->
-		<p class="h-kicker">Die Geschichte</p>
+		<p class="h-kicker">The Story</p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:heading {"className":"h-h2"} -->
-		<h2 class="wp-block-heading h-h2">Eine der Mütter von <em>TiTis on Decks</em></h2>
+		<h2 class="wp-block-heading h-h2">One of the mothers of <em>TiTis on Decks</em></h2>
 		<!-- /wp:heading -->
 	</div>
 	<!-- /wp:group -->
@@ -24,17 +24,17 @@
 	<!-- wp:group {"className":"h-story-grid tod-reveal","layout":{"type":"default"}} -->
 	<div class="wp-block-group h-story-grid tod-reveal">
 		<!-- wp:paragraph {"className":"h-quote"} -->
-		<p class="h-quote">Verschiedene Sounds. <em>Eine Frequenz.</em></p>
+		<p class="h-quote">Different sounds. <em>One frequency.</em></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:group {"className":"h-copy","layout":{"type":"default"}} -->
 		<div class="wp-block-group h-copy">
 			<!-- wp:paragraph -->
-			<p>Mit <strong>Lutzi</strong> habe ich <strong>TiTis on Decks</strong> gegründet — ein weibliches DJ-Kollektiv aus der Nacht an der Algarve. Hier schreibe ich meine eigene Seite dieser Geschichte.</p>
+			<p>With <strong>Lutzi</strong> I founded <strong>TiTis on Decks</strong> — a female DJ collective born in the Algarve night. This page is my own side of that story.</p>
 			<!-- /wp:paragraph -->
 
 			<!-- wp:paragraph -->
-			<p>Dieser Absatz gehört dir, Glitta: Wie du zum Auflegen gekommen bist, was dich hinter die Decks zieht, welche Nächte dich geprägt haben. Einfach anklicken und drüberschreiben.</p>
+			<p>This paragraph is yours, Glitta: how you found your way to the decks, what pulls you into the night, the floors that shaped you. Just click and write over it.</p>
 			<!-- /wp:paragraph -->
 		</div>
 		<!-- /wp:group -->

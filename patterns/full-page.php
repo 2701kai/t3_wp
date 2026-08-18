@@ -1,9 +1,9 @@
 <?php
 /**
- * Title: Glitta — die ganze Seite
+ * Title: Glitta — The Whole Page
  * Slug: tod-pink/full-page
  * Categories: tod-pink
- * Description: Alle Abschnitte in einem Zug: Hero, Story, Sets, Termine, Galerie, Booking, Finale. Beim Anlegen einer neuen Seite als Startlayout wählbar.
+ * Description: Every section in one go: hero, story, sets, dates, gallery, booking, finale. Offered as a starter layout when creating a new page.
  * Block Types: core/post-content
  * Post Types: page, wp_template
  * Viewport Width: 1400
