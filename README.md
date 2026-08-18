@@ -1,90 +1,91 @@
-# t3_wp — a WordPress theme from t.o.d.
+# t3_wp — »t.o.d. pink — Glitta«
 
-Glitta's personal page, derived from the [TiTis on Decks](https://github.com/2701kai/t2)
-site (`t2`): same animations, same layout language, the **pink & purple night
-palette** (`/pink`) — rebuilt as a WordPress theme she can install once and
-then feed herself: texts, photos, sets, dates, all from wp-admin.
+A WordPress **block theme** derived from the [TiTis on Decks](https://github.com/2701kai/t2)
+site: the `/pink` night palette (void indigo, neon magenta, UV violet, cyan),
+the animations (neon flicker-on titles, drifting spores, laser sweeps, pointer
+tilt, the living equalizer) and the layout language — rebuilt without React,
+so Glitta edits every text, photo, set and date herself in wp-admin.
 
-## Why this is very doable
+The hero follows the `/anja` featured-artist layout (kicker → flickering
+name → tilted portrait → intro); the sections below it are the `/pink`
+home page: Story, Sets, Termine, Galerie, Booking, Finale.
 
-The t2 site was built in a way that makes the derivation cheap:
+## Install
 
-- **The pink variation is ~30 lines of CSS custom properties.**
-  `html[data-theme='pink']` in `src/styles/home.css` swaps the tokens
-  (void indigo `#08041a`, neon magenta `#ff3ecf`, UV violet `#8a5cff`,
-  cyan `#37f5e0`, acid `#b8ff2e`, cream `#f0e9ff`) over the *same* section
-  styles. The theme ships only the pink block — no theme switcher needed.
-- **Half the animations are already framework-free.**
-  `Spores` and `Waveform` are plain canvas (their default colors *are* the
-  pink palette), `ShinyText` is pure CSS. They move over almost verbatim.
-- **The React-only pieces are tiny.** `SplitText` (neon flicker-on),
-  `Reveal` (scroll fade + rise) and `TiltCard` (pointer tilt + glare) are
-  ~30–90 lines each and re-implement cleanly in vanilla JS:
-  IntersectionObserver + CSS keyframes with per-character delays, and a
-  `pointermove` handler for the tilt. No React in the WordPress theme.
-- **There is already a blueprint for a personal page.** `/anja` is a
-  one-artist page *in the pink theme*: kicker → flicker-on name → tilted
-  portrait → caption → intro. Glitta's hero is that page, grown up —
-  plus her sets, dates, gallery and contact from the home page sections.
+1. Build the zip: `sh scripts/build-zip.sh` → `tod-pink.zip`
+   (or download the repo zip from GitHub and rename the inner folder to `tod-pink`).
+2. In wp-admin: **Design → Themes → Hinzufügen → Theme hochladen** → `tod-pink.zip` → aktivieren.
+3. **Seiten → Erstellen**: WordPress offers the starter layout
+   **»Glitta — die ganze Seite«** — pick it, title the page »Glitta«, publish.
+4. **Einstellungen → Lesen**: »Eine statische Seite« → homepage = »Glitta«.
 
-## Architecture: block theme (FSE)
+Requires WordPress 6.5+ (any normal hosting with custom-theme upload;
+WordPress.com only on the plan tier that allows theme uploads).
 
-A modern **block theme** — not a classic PHP theme — because the whole
-point is that Glitta edits everything herself in the Site Editor:
+## Für Glitta — so pflegst du die Seite
+
+Alles passiert auf deiner Seite »Glitta« (Seiten → Glitta → Bearbeiten):
+
+- **Texte**: anklicken, drüberschreiben. Fertig.
+- **Dein Porträt**: das leere Bild im Hero anklicken → Mediathek → Foto wählen.
+- **Fotos**: im Abschnitt »Momente« auf die Galerie klicken und Bilder aus
+  der Mediathek hinzufügen — Captions erscheinen automatisch im Nacht-Look.
+- **Neues Set**: im Abschnitt »Der Sound« eine Set-Karte anklicken →
+  ⋮ → Duplizieren → SoundCloud-Link im Einbettungsblock tauschen.
+  Den Player baut WordPress von selbst.
+- **Neues Date**: im Abschnitt »Termine« eine Zeile duplizieren, Texte tauschen.
+- **Booking-Adresse**: im Kontakt-Abschnitt steckt noch `glitta@example.com`
+  im Mail-Button — durch die echte Adresse ersetzen.
+- Einzelne Abschnitte lassen sich auch neu einfügen: Block-Inserter →
+  Kategorie **»t.o.d. pink«**.
+
+## What's inside
 
 ```
-tod-pink/
-  style.css              theme header
-  theme.json             pink palette + typography as editor tokens
-  templates/             index, page, single (minimal HTML templates)
-  parts/                 header (nav), footer (finale gradient)
-  patterns/              hero, story, sets, dates, gallery, booking — one
-                         pattern per t2 section, pre-filled, fully editable
-  assets/css/            ported home.css (pink block + section styles)
-  assets/css/fonts.css   the embedded data-URI fonts, unchanged
-  assets/js/tod.js       spores · waveform · split-text · reveal · tilt
-                         (vanilla, respects prefers-reduced-motion)
-  functions.php          enqueues, pattern registration
+style.css              theme header
+theme.json             pink palette + typography as editor tokens
+templates/             front-page, page, index (header · content · footer)
+parts/                 header (fixed neon nav), footer (credit river)
+patterns/              hero · story · sets · dates · gallery · booking ·
+                       finale · full-page (starter layout for new pages)
+assets/css/fonts.css   Monoton, Sora, Space Mono — embedded as data URIs,
+                       no external requests (GDPR-clean, works offline)
+assets/css/tod.css     the ported night: tokens, sections, effects
+assets/js/tod.js       vanilla ports of t2's Spores, SplitText, Reveal,
+                       TiltCard, Waveform — all respect prefers-reduced-motion
+screenshot.png         theme card in wp-admin
 ```
 
-Content mapping — what Glitta touches in wp-admin:
+## Derivation notes (t2 → WordPress)
 
-| t2 today | WordPress |
-|----------|-----------|
-| texts in `i18n/translations.jsx` | headings/paragraphs in the editor |
-| `media.js` + `public/media/` | Media Library + gallery pattern |
-| `sets.js` (SoundCloud links) | paste a SoundCloud URL — WP auto-embeds it |
-| `eventsData.js` | an editable dates pattern (v1); an Events CPT in a tiny companion plugin if she wants archive/filtering later (v2) |
-| `api/booking.js` (Vercel + Resend) | a form plugin, or a small handler on `wp_mail` |
-| DE / PT / EN | v1 ships one language (DE); Polylang later if wanted |
+- The pink variation was already a token swap in t2
+  (`html[data-theme='pink']` in `styles/home.css`) — those values are now
+  simply `:root` in `tod.css`, aliases (`--sun`, `--uvy`, …) kept intact so
+  the ported section rules match the source line for line.
+- `Spores` and `Waveform` were plain canvas/DOM in t2 and moved over almost
+  verbatim; `SplitText`, `Reveal` and `TiltCard` were motion/React and are
+  re-implemented with IntersectionObserver + CSS keyframes + `pointermove`.
+  Reveal animates the CSS `translate` property, not `transform`, so a card
+  can reveal *and* tilt at once.
+- Without JavaScript nothing is hidden: effects only arm once `tod.js` adds
+  `.tod-js` to `<html>`. With `prefers-reduced-motion` the night stands still.
+- Content that lived in JS modules (`sets.js`, `media.js`, `eventsData.js`)
+  is now ordinary block content; SoundCloud links auto-embed.
 
-## Build order
+## Inherited watch-outs
 
-1. **Scaffold + tokens** — theme header, `theme.json` with the pink
-   palette and type scale, port `fonts.css` and the `data-theme='pink'`
-   token block. The site background/glow lands on `body`.
-2. **Sections as patterns** — port the section CSS from `home.css`,
-   rebuild each section's markup as a block pattern (hero modeled on
-   `/anja`, then story, sets, dates, gallery, booking, finale).
-3. **The effects file** — vanilla ports of Spores, Waveform, SplitText,
-   Reveal, TiltCard behind `prefers-reduced-motion`, wired by class names
-   the patterns already carry.
-4. **Content wiring** — menu, gallery, SoundCloud embeds, contact form.
-5. **Package + hand over** — zip, install on her WordPress, and a
-   ten-minute walkthrough: edit a text, swap a photo, add a set, add a date.
+- **EMOTIQ is not bundled.** t2 ships only the demo cut (© Enxyclo Studio,
+  license pending), so this theme's display face is Monoton — draft1's
+  original neon, fitting for the pink/purple night. Once EMOTIQ is licensed:
+  add its `@font-face` to `assets/css/fonts.css` and put `'EMOTIQ'` first in
+  `--font-display` in `assets/css/tod.css`.
+- **Photo rights** — t2 is curtained over exactly this. Only imagery with
+  cleared rights goes into the Mediathek; the shipped theme contains no photos.
+- **GPL** — the theme is GPL-2.0-or-later, like WordPress.
 
-## Watch-outs (inherited from t2)
+## Verified
 
-- **EMOTIQ is the demo cut** (© Enxyclo Studio, license pending in t2).
-  Before Glitta's page goes public: buy the license, or her theme's
-  display font falls back to Monoton/Sora, which are OFL and already
-  embedded.
-- **Photo rights** — t2 is curtained over exactly this. Her page only
-  ships imagery she holds rights to; everything else stays placeholders
-  until cleared.
-- **Hosting** — she needs a WordPress that accepts custom themes: any
-  self-hosted WP, or WordPress.com on the plan tier that allows theme
-  uploads. (The Vercel/serverless booking pipeline does not come along —
-  WordPress replaces it.)
-- **GPL** — if the theme is ever distributed beyond her install, it
-  should be GPL-compatible like WordPress itself. Private use: no issue.
+Smoke-tested against a real WordPress (6.x, wp-cli + SQLite) with
+Playwright: patterns register, the starter layout assembles the full page,
+both SoundCloud oEmbeds resolve into players, all reveals/splits fire,
+spores + equalizer run, tilt + glare follow the pointer, no console errors.

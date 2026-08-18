@@ -1,0 +1,835 @@
+/* ============================================================
+   t.o.d. pink — Glitta
+   Ported from titisondecks.com/pink (t2: styles/home.css pink
+   tokens over the shared sections, styles/site.css base).
+   One palette only — the pink & purple night:
+   --coal   #08041a  void indigo (the night)
+   --sun    #ff3ecf  neon magenta (primary accent)
+   --ember  #8a5cff  UV violet
+   --uvy    #37f5e0  bioluminescent cyan
+   --acid   #b8ff2e  acid green (rare pop)
+   --wick   #ffb32e  amber (rare warm pop)
+   --cream  #f0e9ff  violet-biased near-white (text)
+   Type: Monoton (neon display) / Sora (body) / Space Mono (data).
+   EMOTIQ is not bundled (license pending in t2) — once licensed,
+   add its @font-face in fonts.css and put it first in --font-display.
+   ============================================================ */
+
+:root {
+  --coal: #08041a;
+  --coal-2: #0e0826;
+  --sun: #ff3ecf;
+  --ember: #8a5cff;
+  --uvy: #37f5e0;
+  --acid: #b8ff2e;
+  --teal: #37f5e0;
+  --wick: #ffb32e;
+  --cream: #f0e9ff;
+  --cream-dim: #a99cc9;
+  --line-h: rgba(158, 120, 255, 0.22);
+
+  --sun-rgb: 255 62 207;
+  --ember-rgb: 138 92 255;
+  --uvy-rgb: 55 245 224;
+  --acid-rgb: 184 255 46;
+  --coal-rgb: 8 4 26;
+  --raise-rgb: 14 8 38;
+
+  --bg-glow-a: #1a0f3d;
+  --bg-glow-b: #120a30;
+  --finale-grad: linear-gradient(180deg, var(--coal) 0%, #170d3c 22%, #3c1e63 44%, #83407e 62%, #d4718b 76%, #ffb98a 88%, #ffd9a8 100%);
+  --finale-ink: #2a1245;
+  --finale-ink-line: rgba(42, 18, 69, 0.5);
+  --finale-sub: rgba(255, 244, 235, 0.92);
+  --river-grad: linear-gradient(180deg, #7fb0a2, #4a7a70);
+  --river-ink: #eafff7;
+
+  --font-display: 'Monoton', 'Arial Black', sans-serif;
+  --font-body: 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+  --font-mono: 'Space Mono', 'Courier New', monospace;
+
+  --step-0: clamp(0.95rem, 0.9rem + 0.25vw, 1.05rem);
+  --step-1: clamp(1.2rem, 1.1rem + 0.5vw, 1.5rem);
+  --step-2: clamp(1.6rem, 1.3rem + 1.4vw, 2.4rem);
+  --step-3: clamp(2.2rem, 1.6rem + 3vw, 4rem);
+
+  --pad: clamp(1.25rem, 4vw, 3rem);
+  --measure: 62ch;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 4.5rem;
+  background: var(--coal);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.7;
+  color: var(--cream);
+  background:
+    radial-gradient(120vw 90vh at 72% -12%, var(--bg-glow-a) 0%, transparent 60%),
+    radial-gradient(90vw 70vh at 6% 28%, var(--bg-glow-b) 0%, transparent 55%),
+    var(--coal);
+  overflow-x: hidden;
+}
+
+::selection { background: var(--sun); color: var(--coal); }
+
+a { color: var(--sun); text-decoration-color: rgb(var(--sun-rgb) / 0.4); }
+a:hover { text-decoration-color: var(--sun); }
+
+:focus-visible {
+  outline: 2px solid var(--uvy);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+h1, h2, h3 { text-wrap: balance; }
+
+/* ---------- nav (fixed, fades into the night) ---------- */
+
+.h-nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem var(--pad);
+  background: linear-gradient(rgb(var(--coal-rgb) / 0.93), rgb(var(--coal-rgb) / 0.55) 70%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+.h-mark,
+.h-mark a {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.12em;
+  color: var(--cream);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+}
+
+.h-nav-links {
+  display: flex;
+  gap: clamp(0.8rem, 2.5vw, 2rem);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.h-nav-links a { color: var(--cream-dim); text-decoration: none; padding: 0.2rem 0; }
+.h-nav-links a:hover { color: var(--uvy); text-shadow: 0 0 12px rgb(var(--uvy-rgb) / 0.7); }
+
+/* ---------- hero — the artist page (Anja-layout, Glitta's name) ---------- */
+
+.tod-artist {
+  position: relative;
+  isolation: isolate;
+  min-height: 100svh;
+  overflow: hidden;
+  display: grid;
+  align-content: center;
+}
+
+/* spores drift in here (canvas injected by tod.js) */
+.tod-atmo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.tod-atmo canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* slow UV-glow breathing behind the title */
+.tod-artist::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  background:
+    radial-gradient(46rem 30rem at 50% 58%, rgb(var(--ember-rgb) / 0.17), transparent 70%),
+    radial-gradient(30rem 20rem at 32% 40%, rgb(var(--sun-rgb) / 0.1), transparent 70%);
+  animation: h-torch 7s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes h-torch {
+  from { opacity: 0.65; transform: scale(1); }
+  55%  { opacity: 1; }
+  to   { opacity: 0.8; transform: scale(1.06); }
+}
+
+/* laser fans sweeping from the top corners */
+.h-laser {
+  position: absolute;
+  top: -10%;
+  width: 200vmax;
+  height: 2px;
+  z-index: -1;
+  opacity: 0.5;
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+
+.h-laser::before {
+  content: "";
+  position: absolute;
+  inset: -1px 0;
+  filter: blur(1px);
+  background: inherit;
+}
+
+.h-laser-a { left: -4%; background: linear-gradient(90deg, var(--sun), transparent 70%); animation: sweep-a 11s ease-in-out infinite alternate; }
+.h-laser-b { left: -4%; background: linear-gradient(90deg, var(--uvy), transparent 70%); animation: sweep-b 13s ease-in-out infinite alternate; }
+.h-laser-c { right: -4%; background: linear-gradient(90deg, var(--acid), transparent 70%); transform-origin: 100% 0; animation: sweep-c 17s ease-in-out infinite alternate; }
+
+@keyframes sweep-a { from { transform: rotate(18deg); } to { transform: rotate(64deg); } }
+@keyframes sweep-b { from { transform: rotate(55deg); } to { transform: rotate(24deg); } }
+@keyframes sweep-c { from { transform: rotate(118deg); } to { transform: rotate(162deg); } }
+
+.tod-artist-main {
+  position: relative;
+  z-index: 1;
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: clamp(4.5rem, 12vh, 7rem) var(--pad) clamp(3rem, 9vh, 6rem);
+  display: grid;
+  gap: 1.5rem;
+  justify-items: center;
+  text-align: center;
+}
+
+.tod-artist-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--teal);
+  filter: drop-shadow(0 0 10px rgb(55 245 224 / 0.5));
+  margin: 0;
+}
+
+.tod-artist-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(3rem, 12vw, 6.5rem);
+  line-height: 1;
+  color: var(--cream);
+  margin: 0;
+  text-shadow: 0 0 24px rgb(var(--sun-rgb) / 0.85), 0 0 80px rgb(var(--ember-rgb) / 0.5);
+}
+
+.tod-artist-figure {
+  width: min(22rem, 82vw);
+  margin: 0.5rem 0 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 24px 70px rgb(var(--coal-rgb) / 0.8), 0 0 45px rgb(var(--ember-rgb) / 0.35);
+}
+
+.tod-artist-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.tod-artist-caption {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  color: var(--cream-dim);
+  margin: 0;
+}
+
+.tod-artist-intro {
+  margin: 0;
+  max-width: 46ch;
+  color: var(--cream);
+  font-size: var(--step-1);
+  line-height: 1.7;
+}
+
+.tod-artist-note {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  line-height: 1.9;
+  color: var(--cream-dim);
+  margin: 0;
+  max-width: 52ch;
+}
+
+/* ---------- buttons (neon pills) ---------- */
+
+.h-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  justify-content: center;
+  margin-top: 0.6rem;
+}
+
+.h-btn,
+.h-btn-wp > .wp-block-button__link {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 0.85rem 1.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--sun);
+  color: var(--sun);
+  background: rgb(var(--sun-rgb) / 0.07);
+  box-shadow: 0 0 18px rgb(var(--sun-rgb) / 0.25), inset 0 0 12px rgb(var(--sun-rgb) / 0.1);
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  animation: h-btn-pulse 3.6s ease-in-out infinite;
+}
+
+.h-btn:hover,
+.h-btn-wp > .wp-block-button__link:hover {
+  background: rgb(var(--sun-rgb) / 0.16);
+  box-shadow: 0 0 30px rgb(var(--sun-rgb) / 0.55), inset 0 0 16px rgb(var(--sun-rgb) / 0.2);
+  transform: translateY(-1px);
+  animation-play-state: paused;
+  color: var(--sun);
+}
+
+@keyframes h-btn-pulse {
+  0%, 100% { box-shadow: 0 0 18px rgb(var(--sun-rgb) / 0.22), inset 0 0 12px rgb(var(--sun-rgb) / 0.1); }
+  50%      { box-shadow: 0 0 26px rgb(var(--sun-rgb) / 0.4), inset 0 0 12px rgb(var(--sun-rgb) / 0.12); }
+}
+
+.h-btn-ghost,
+.h-btn-ghost-wp > .wp-block-button__link {
+  border-color: rgb(var(--uvy-rgb) / 0.7);
+  color: var(--uvy);
+  background: rgb(var(--uvy-rgb) / 0.05);
+  box-shadow: 0 0 18px rgb(var(--uvy-rgb) / 0.16), inset 0 0 12px rgb(var(--uvy-rgb) / 0.08);
+  animation: none;
+}
+
+.h-btn-ghost:hover,
+.h-btn-ghost-wp > .wp-block-button__link:hover {
+  background: rgb(var(--uvy-rgb) / 0.13);
+  box-shadow: 0 0 30px rgb(var(--uvy-rgb) / 0.4), inset 0 0 16px rgb(var(--uvy-rgb) / 0.16);
+  color: var(--uvy);
+}
+
+/* ---------- the living equalizer (bars injected by tod.js) ---------- */
+
+.tod-wave {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 34px;
+}
+
+.tod-wave i {
+  width: 4px;
+  height: var(--h, 20px);
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--uvy), var(--ember));
+  box-shadow: 0 0 8px rgb(var(--sun-rgb) / 0.55);
+  transform-origin: bottom;
+  animation: tod-wave-pulse var(--d, 1.3s) ease-in-out infinite;
+  animation-delay: var(--dl, 0s);
+}
+
+@keyframes tod-wave-pulse {
+  0%, 100% { transform: scaleY(0.35); }
+  25%      { transform: scaleY(1); }
+  50%      { transform: scaleY(0.5); }
+  75%      { transform: scaleY(0.85); }
+}
+
+/* ---------- shared section shell ---------- */
+
+.h-section {
+  position: relative;
+  padding: clamp(4rem, 10vh, 7rem) var(--pad);
+  max-width: 72rem;
+  margin: 0 auto;
+  display: grid;
+  gap: 2.2rem;
+}
+
+.h-head { display: grid; gap: 0.5rem; }
+
+.h-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--acid);
+  text-shadow: 0 0 10px rgb(var(--acid-rgb) / 0.45);
+  margin: 0;
+}
+
+.h-h2 {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: var(--step-3);
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  margin: 0;
+  color: var(--cream);
+}
+
+.h-h2 em {
+  font-style: normal;
+  color: var(--sun);
+  text-shadow: 0 0 22px rgb(var(--sun-rgb) / 0.6);
+}
+
+/* ---------- story / about ---------- */
+
+.h-story-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  align-items: start;
+}
+
+.h-copy { max-width: var(--measure); display: grid; gap: 1rem; }
+.h-copy p { margin: 0; color: var(--cream-dim); }
+.h-copy strong { color: var(--cream); font-weight: 600; }
+
+.h-quote {
+  margin: 0;
+  max-width: 30ch;
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: var(--step-2);
+  line-height: 1.25;
+  color: var(--cream);
+}
+
+.h-quote em {
+  font-style: normal;
+  color: var(--uvy);
+  text-shadow: 0 0 20px rgb(var(--uvy-rgb) / 0.55);
+}
+
+.h-facts {
+  border: 1px solid var(--line-h);
+  border-radius: 4px;
+  padding: 1.4rem 1.5rem;
+  background: linear-gradient(160deg, rgb(var(--ember-rgb) / 0.08), rgb(var(--coal-rgb) / 0.4));
+  display: grid;
+  gap: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+}
+
+.h-facts p { margin: 0; color: var(--cream); }
+.h-facts strong {
+  display: block;
+  color: var(--uvy);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  font-weight: 400;
+}
+
+/* genre pills */
+.h-genres { display: flex; flex-wrap: wrap; gap: 0.6rem; max-width: 46rem; margin: 0; padding: 0; list-style: none; }
+
+.h-genre,
+.h-genres li {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.42rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--line-h);
+  color: var(--cream-dim);
+  background: rgb(var(--raise-rgb) / 0.55);
+  transition: color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.h-genre:hover,
+.h-genres li:hover {
+  color: var(--coal);
+  border-color: var(--sun);
+  background: var(--sun);
+  box-shadow: 0 0 22px rgb(var(--sun-rgb) / 0.55);
+  transform: translateY(-2px);
+}
+
+.h-statement {
+  margin: 0;
+  max-width: 34ch;
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: var(--step-2);
+  line-height: 1.22;
+  color: var(--cream);
+}
+
+.h-statement em {
+  font-style: normal;
+  color: var(--ember);
+  text-shadow: 0 0 22px rgb(var(--ember-rgb) / 0.6);
+}
+
+/* ---------- sound / sets (SoundCloud embeds in night frames) ---------- */
+
+.h-sets {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
+  gap: 1.2rem;
+}
+
+.h-set {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line-h);
+  border-radius: 4px;
+  padding: 1.2rem;
+  display: grid;
+  gap: 0.8rem;
+  align-content: start;
+  background: linear-gradient(170deg, rgb(var(--raise-rgb) / 0.9), rgb(var(--coal-rgb) / 0.6));
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.h-set:hover {
+  border-color: var(--sun);
+  box-shadow: 0 0 26px rgb(var(--sun-rgb) / 0.22);
+  transform: translateY(-2px);
+}
+
+.h-set-title { font-weight: 600; font-size: 1.05rem; color: var(--cream); margin: 0; }
+.h-set-desc { margin: 0; color: var(--cream-dim); font-size: 0.9rem; }
+
+.h-set-meta {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--acid);
+  margin: 0;
+}
+
+.h-set .wp-block-embed { margin: 0; }
+.h-set .wp-block-embed__wrapper iframe {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: 3px;
+}
+
+.h-profiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 1.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.h-note { font-family: var(--font-mono); font-size: 0.78rem; color: var(--cream-dim); margin: 0; line-height: 2; }
+
+/* ---------- next dates ---------- */
+
+.tod-dates { display: grid; gap: 0; border-top: 1px solid var(--line-h); }
+
+.tod-date {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 1.6rem;
+  padding: 1rem 0.2rem;
+  border-bottom: 1px solid var(--line-h);
+  margin: 0;
+}
+
+.tod-date-when {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--uvy);
+  text-shadow: 0 0 12px rgb(var(--uvy-rgb) / 0.5);
+  margin: 0;
+  min-width: 11rem;
+}
+
+.tod-date-what { font-weight: 600; color: var(--cream); margin: 0; }
+.tod-date-where { color: var(--cream-dim); margin: 0; font-size: 0.9rem; }
+
+/* ---------- gallery (core gallery block in the night frame) ---------- */
+
+.h-gallery-wp.wp-block-gallery { gap: 1.2rem; }
+
+.h-gallery-wp .wp-block-image {
+  border: 1px solid var(--line-h);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--coal-2);
+  position: relative;
+  margin: 0;
+}
+
+.h-gallery-wp .wp-block-image img { display: block; }
+
+/* faint CRT scanlines over every tile, the draft's trick */
+.h-gallery-wp .wp-block-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, rgb(var(--coal-rgb) / 0.12) 0 1px, transparent 1px 4px);
+  pointer-events: none;
+}
+
+.h-gallery-wp .wp-block-image figcaption {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.12em;
+  color: var(--cream-dim);
+  background: none;
+  position: relative;
+  z-index: 1;
+  padding: 0.5rem 0.65rem;
+}
+
+.h-gallery-wp .wp-block-image figcaption::before { content: "▸ "; color: var(--ember); }
+
+/* ---------- booking / contact ---------- */
+
+.tod-booking-intro { margin: 0; color: var(--cream-dim); max-width: var(--measure); }
+
+/* if a form plugin lands in this section it wears the night automatically */
+.tod-booking input:not([type='submit']):not([type='button']),
+.tod-booking textarea,
+.tod-booking select {
+  font: inherit;
+  color: var(--cream);
+  background: rgb(var(--raise-rgb) / 0.55);
+  border: 1px solid var(--line-h);
+  border-radius: 4px;
+  padding: 0.7rem 0.85rem;
+  color-scheme: dark;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.tod-booking input::placeholder,
+.tod-booking textarea::placeholder { color: var(--cream-dim); opacity: 0.55; }
+
+.tod-booking input:focus-visible,
+.tod-booking textarea:focus-visible {
+  outline: none;
+  border-color: var(--sun);
+  box-shadow: 0 0 18px rgb(var(--sun-rgb) / 0.3), inset 0 0 10px rgb(var(--sun-rgb) / 0.08);
+}
+
+.tod-booking textarea { resize: vertical; min-height: 8rem; }
+
+.tod-booking label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--uvy);
+}
+
+.tod-booking input[type='submit'],
+.tod-booking button {
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 0.85rem 1.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--sun);
+  color: var(--sun);
+  background: rgb(var(--sun-rgb) / 0.07);
+  box-shadow: 0 0 18px rgb(var(--sun-rgb) / 0.25), inset 0 0 12px rgb(var(--sun-rgb) / 0.1);
+}
+
+/* ---------- finale — night → dawn ---------- */
+
+.h-finale {
+  margin-top: clamp(4rem, 10vh, 7rem);
+  position: relative;
+  text-align: center;
+  padding: clamp(6rem, 16vh, 10rem) var(--pad) clamp(4rem, 10vh, 6rem);
+  background: var(--finale-grad);
+}
+
+.h-finale-inner { display: grid; gap: 1.2rem; justify-items: center; }
+
+.h-finale-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--acid);
+  margin: 0;
+}
+
+.h-finale-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.1rem, 7.5vw, 4.4rem);
+  line-height: 1.14;
+  margin: 0;
+  color: #fff;
+  text-shadow: 0 0 24px rgb(var(--sun-rgb) / 0.9), 0 0 70px rgb(var(--ember-rgb) / 0.5);
+}
+
+.h-finale-sub { margin: 0; max-width: 52ch; color: var(--finale-sub); }
+
+.h-finale-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  margin: 0.8rem 0 0;
+}
+
+.h-finale-links a { color: var(--finale-ink); text-decoration-color: var(--finale-ink-line); font-weight: 700; }
+
+/* the credit river at the very bottom */
+.h-river {
+  margin: 0;
+  padding: 1.6rem var(--pad) 2rem;
+  background: var(--river-grad);
+  color: var(--river-ink);
+}
+
+.h-river-inner {
+  max-width: 72rem;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 2rem;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+}
+
+.h-river-inner p { margin: 0; }
+.h-river-inner a { color: inherit; }
+
+/* ============================================================
+   Effects — activated by tod.js (html gets .tod-js). Without JS
+   nothing is ever hidden; with reduced motion everything rests.
+   ============================================================ */
+
+/* neon flicker-on, character by character (SplitText) */
+.tod-split { display: inline-block; }
+
+html.tod-js .tod-split .tod-char {
+  display: inline-block;
+  white-space: pre;
+  opacity: 0;
+}
+
+html.tod-js .tod-split.is-on .tod-char {
+  animation: tod-flicker 0.7s ease-out both;
+  animation-delay: calc(var(--i) * 0.045s);
+}
+
+@keyframes tod-flicker {
+  0%   { opacity: 0; transform: translateY(0.35em); filter: blur(6px); }
+  55%  { opacity: 1; transform: translateY(0);      filter: blur(0); }
+  75%  { opacity: 0.35; }
+  100% { opacity: 1;  transform: translateY(0);     filter: blur(0); }
+}
+
+/* scroll-into-view fade + rise (Reveal). Uses `translate`, not
+   `transform`, so a card can be .tod-reveal and .tod-tilt at once —
+   the tilt owns transform, the reveal owns translate. */
+html.tod-js .tod-reveal {
+  opacity: 0;
+  translate: 0 26px;
+  transition: opacity 0.7s ease-out, translate 0.7s ease-out;
+}
+
+html.tod-js .tod-reveal.is-in {
+  opacity: 1;
+  translate: none;
+}
+
+/* pointer tilt + glare (TiltCard) */
+.tod-tilt {
+  position: relative;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+html.tod-js .tod-tilt {
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 120ms ease-out;
+}
+
+.tod-tilt .tod-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(230px circle at var(--gx, 50%) var(--gy, 50%), rgba(240, 233, 255, 0.13), transparent 65%);
+}
+
+/* light sweep across text (ShinyText) — pure CSS */
+.shiny {
+  background: linear-gradient(120deg, currentcolor 38%, #ffffff 50%, currentcolor 62%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 4.5s linear infinite;
+}
+
+@keyframes shine {
+  from { background-position: 180% 0; }
+  to   { background-position: -40% 0; }
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 46rem) {
+  .h-story-grid { grid-template-columns: 1fr; }
+  .h-nav-links { display: none; }
+  .tod-date-when { min-width: 0; }
+}
+
+/* ---------- reduced motion: the night stands still ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .h-laser { animation: none; opacity: 0.25; }
+  .tod-artist::before { animation: none; }
+  .h-btn, .h-btn-wp > .wp-block-button__link { animation: none; transition: none; }
+  .h-set, .h-genre { transition: none; }
+  .tod-wave i { animation: none; }
+  .shiny { animation: none; -webkit-text-fill-color: currentcolor; background: none; }
+  html.tod-js .tod-split .tod-char { opacity: 1; animation: none; }
+  html.tod-js .tod-reveal { opacity: 1; translate: none; transition: none; }
+  html.tod-js .tod-tilt { transform: none; transition: none; }
+}

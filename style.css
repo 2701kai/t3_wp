@@ -1,0 +1,17 @@
+/*
+Theme Name: t.o.d. pink — Glitta
+Theme URI: https://github.com/2701kai/t3_wp
+Author: kai & the TiTis
+Author URI: https://github.com/2701kai
+Description: Glitta's personal page in the TiTis on Decks night palette — void indigo, neon magenta, UV violet, cyan. A block theme derived from titisondecks.com/pink: the same animations (neon flicker-on titles, drifting spores, pointer tilt, light sweeps), rebuilt without React so every text, photo, set and date is editable in wp-admin.
+Version: 0.1.0
+Requires at least: 6.5
+Tested up to: 6.8
+Requires PHP: 7.4
+License: GNU General Public License v2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: tod-pink
+Tags: block-patterns, full-site-editing, one-column, dark, entertainment, music
+*/
+
+/* All styles live in assets/css/ — this file only carries the header. */
