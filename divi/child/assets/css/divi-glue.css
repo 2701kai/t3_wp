@@ -64,6 +64,29 @@
   text-align: center;
 }
 
+/* ---------- the atmosphere must span the hero, not its module ----------
+   In t2 the spores canvas and the three lasers are direct children of the
+   hero, so they measure the full section. Divi puts every module inside
+   .et_pb_row > .et_pb_column > .et_pb_module > .et_pb_code_inner, and all
+   of those are position:relative - so the backdrop's inset:0 resolved
+   against the code module's own box: 608 x 0 px. A zero-height canvas
+   draws zero spores, and the lasers started at the module instead of
+   sweeping the screen. Taking the wrappers out of the positioning chain
+   hands the backdrop back to the section; the content modules then carry
+   the z-index the row used to hold. */
+
+.et_pb_section.tod-artist .et_pb_row.tod-artist-main,
+.et_pb_section.tod-artist .tod-artist-main > .et_pb_column,
+.et_pb_section.tod-artist .et_pb_code:has(.tod-atmo),
+.et_pb_section.tod-artist .et_pb_code:has(.tod-atmo) > .et_pb_code_inner {
+  position: static !important;
+}
+
+.et_pb_section.tod-artist .tod-artist-main .et_pb_module:not(:has(.tod-atmo)) {
+  position: relative;
+  z-index: 1;
+}
+
 .et_pb_section.tod-artist .et_pb_text { text-align: center; }
 .et_pb_section.tod-artist .tod-wave { justify-content: center; }
 
