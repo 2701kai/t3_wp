@@ -244,12 +244,21 @@ def code(label, html):
         label, BV, html)
 
 
-def row(body, label=""):
+def col(body, type_="4_4"):
+    return ('[et_pb_column type="%s" _builder_version="%s"]%s[/et_pb_column]'
+            % (type_, BV, body))
+
+
+def row_cols(cols, label="", module_class=None):
+    mc = ' module_class="%s"' % module_class if module_class else ""
     lbl = ' admin_label="%s"' % label if label else ""
-    return ('[et_pb_row width="100%%" max_width="none"'
-            ' custom_padding="0px||0px||true|false"%s _builder_version="%s"]'
-            '[et_pb_column type="4_4" _builder_version="%s"]%s'
-            "[/et_pb_column][/et_pb_row]") % (lbl, BV, BV, body)
+    return ('[et_pb_row%s width="100%%" max_width="none"'
+            ' custom_padding="0px||0px||true|false"%s _builder_version="%s"]%s'
+            "[/et_pb_row]") % (mc, lbl, BV, "".join(cols))
+
+
+def row(body, label=""):
+    return row_cols([col(body)], label)
 
 
 def tonearm_js(js, strings):
@@ -307,6 +316,60 @@ def tonearm_js(js, strings):
         "%s\n})();" % (SCOPE, arm))
 
 
+STAGE_ROW = "g2-stage-row"
+
+# Transform 6. The source lays hero / list / deck out as ONE grid with named
+# areas ("hero deck" / "list deck" at >=900px, deck sticky down the right).
+# Divi wraps every module in row > column > module, so those three can never
+# be siblings again and the grid loses its occupants - which is exactly how
+# the first import rendered: a flat vertical stack. The two-column split is
+# therefore Divi's (a 2_3 and a 1_3 column) and this block retires the grid
+# and gives the deck the height chain position:sticky needs to travel in.
+# Appended, never merged into the scoped source, same as the other five.
+STAGE_OVERRIDE = """
+/* ---------- transform 6: the stage, rebuilt on Divi's columns ---------- */
+.SCOPE .stage{ display:block; }
+.SCOPE .hero-copy, .SCOPE .stage-deck{ align-self:auto; }
+
+/* Divi stacks its own columns at 980px; the source grid switched at 900.
+   Those 80px were a band where our CSS thought "two columns" and Divi had
+   already stacked them. The split now uses Divi's breakpoint, and the
+   stacking below it is stated here rather than borrowed. */
+@media(max-width:980px){
+  .SCOPE .ROW > .et_pb_column{
+    float:none !important;
+    width:100% !important;
+    margin:0 0 clamp(2rem,6vw,3rem) !important;
+  }
+}
+
+@media(min-width:981px){
+  .SCOPE .ROW{
+    display:flex !important;
+    align-items:stretch !important;
+    gap:clamp(2rem,5vw,4.5rem);
+  }
+  .SCOPE .ROW > .et_pb_column{
+    float:none !important;
+    width:auto !important;
+    margin:0 !important;
+  }
+  .SCOPE .ROW > .et_pb_column_2_3{ flex:1 1 0; min-width:0; }
+  .SCOPE .ROW > .et_pb_column_1_3{ flex:0 0 clamp(300px,30%,420px); }
+  /* Sticky needs every ancestor between the column and .deck-inner to
+     carry height, or the needle has nowhere to travel. The column itself
+     is deliberately NOT in this list: an explicit height on a flex item
+     beats align-items:stretch, and the column then collapses to its own
+     content - measured 599px against the prose column's 1619px, which is
+     exactly no travel at all. Let flex stretch it, size the rest. */
+  .SCOPE .ROW .et_pb_code,
+  .SCOPE .ROW .et_pb_code_inner,
+  .SCOPE .ROW .stage,
+  .SCOPE .ROW .stage-deck{ height:100%; }
+}
+"""
+
+
 def build(html):
     js = "\n".join(re.findall(r"<script[^>]*>(.*?)</script>", html, re.S))
     css = "\n".join(re.findall(r"<style[^>]*>(.*?)</style>", html, re.S))
@@ -315,7 +378,22 @@ def build(html):
 
     deck_html = extract_element(body, 'class="stage-deck"')
     guard = tonearm_js(js, S)
-    style = "<style>\n%s\n</style>" % scope_css(css, SCOPE)
+
+    # Transform 7. The source loads Unbounded / Work Sans / Space Mono from
+    # Google Fonts with <link> tags in <head>. Only <style> and <script> were
+    # being lifted, so every font fell through to system-ui - the first
+    # import rendered the whole page in the wrong typeface. @import rides
+    # inside the style block, which the importer is now proven to preserve,
+    # and must precede every other rule.
+    m = re.search(r'<link[^>]+href="(https://fonts\.googleapis\.com/css2\?[^"]+)"', html)
+    if not m:
+        raise Fail("could not find the Google Fonts link - g2.html has changed shape")
+    font_url = m.group(1).replace("&amp;", "&")
+
+    override = (STAGE_OVERRIDE.replace(".SCOPE", "." + SCOPE)
+                              .replace(".ROW", "." + STAGE_ROW))
+    style = ('<style>\n@import url("%s");\n%s\n%s</style>'
+             % (font_url, scope_css(css, SCOPE), override))
 
     transport = (
         '<div class="transport">'
@@ -369,10 +447,15 @@ def build(html):
                   '<footer><span class="note">%s</span></footer>'
                   % esc(S["footerNote"]))
 
-    inner = (row(hero, "Hero")
-             + row(deck_module, "Deck - do not split this module")
-             + row(side("A", S["sideANote"], [0, 1, 2]), "Side A")
-             + row(side("B", S["sideBNote"], [3, 4]), "Side B")
+    # One row, two columns: the prose column and the deck column. This is
+    # the grid the source drew, expressed in the only vocabulary that
+    # survives Divi's wrappers.
+    prose = (hero
+             + side("A", S["sideANote"], [0, 1, 2])
+             + side("B", S["sideBNote"], [3, 4]))
+    inner = (row_cols([col(prose, "2_3"), col(deck_module, "1_3")],
+                      "The record - prose left, deck right",
+                      module_class=STAGE_ROW)
              + row(archive + cta + footer, "Archive, booking, footer"))
 
     return ('[et_pb_section fb_built="1" module_class="%s" module_id="g2"'
@@ -393,12 +476,24 @@ def css_rules(css):
     Recurses into @media/@supports so rules inside a breakpoint are
     checked too; @keyframes keys are not selectors and are skipped.
     """
+    # Comments go first, for the whole stylesheet. Leaving them in means a
+    # semicolon inside prose reads as the end of an @import, and a comma
+    # inside prose reads as a second selector - both have now cost a build.
+    css = re.sub(r"/\*.*?\*/", " ", css, flags=re.S)
     out, i = [], 0
     while True:
         b = css.find("{", i)
         if b == -1:
             return out
-        sel = re.sub(r"/\*.*?\*/", " ", css[i:b], flags=re.S).strip()
+        # A statement at-rule (@import, @charset) ends at ';' with no block.
+        # Without consuming it here it merges into the next selector, the
+        # same way a comment used to - and the rule it swallows stops
+        # counting, which reads as "every token undefined".
+        semi = css.find(";", i)
+        if semi != -1 and semi < b:
+            i = semi + 1
+            continue
+        sel = css[i:b].strip()
         depth, j = 0, b
         while j < len(css):
             if css[j] == "{":
@@ -484,6 +579,33 @@ def verify(shortcode, expect):
     if "et_fb=" not in js or "ET_Builder" not in js:
         raise Fail("guard: the et_fb check is missing or narrower than the "
                    "one functions.php applies to tod.js")
+
+    # --- the fonts come with the page ----------------------------------
+    first = re.sub(r"^\s+", "", css)
+    if not first.startswith("@import"):
+        raise Fail("css: @import for the webfonts must be the first rule, or "
+                   "the browser drops it and every font falls back")
+    if "fonts.googleapis.com" not in css:
+        raise Fail("css: the Google Fonts import is missing - the page would "
+                   "render in system-ui")
+
+    # --- the stage is two columns, deck in the narrow one ----------------
+    stage = re.search(r'\[et_pb_row[^\]]*module_class="[^"]*\b%s\b[^\]]*\](.*?)\[/et_pb_row\]'
+                      % STAGE_ROW, shortcode, re.S)
+    if not stage:
+        raise Fail("layout: no row carries %s - the two-column stage is gone "
+                   "and the page would stack flat, as the first import did"
+                   % STAGE_ROW)
+    types = re.findall(r'\[et_pb_column type="([^"]+)"', stage.group(1))
+    if types != ["2_3", "1_3"]:
+        raise Fail("layout: stage row columns are %s, expected ['2_3', '1_3']"
+                   % types)
+    deck_col = stage.group(1).split('[et_pb_column type="1_3"')[1]
+    if "[et_pb_code" not in deck_col:
+        raise Fail("layout: the deck module is not in the 1_3 column")
+    if "transform 6" not in css:
+        raise Fail("css: the stage override block is missing - Divi's floated "
+                   "columns would win and sticky would have no height chain")
 
     # --- the JS contract holds ----------------------------------------
     chapters = len(re.findall(r'module_class="[^"]*\b%s\b' % CHAPTER, shortcode))
