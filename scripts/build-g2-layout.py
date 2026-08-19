@@ -370,6 +370,43 @@ STAGE_OVERRIDE = """
 """
 
 
+# Transform 8. The source wraps every region in <div class="wrap"> - the
+# 1180px measure, the centring margin and the rail padding - and each half
+# of the tracklist in <section class="side">, whose top padding is the air
+# above the heading. Divi builds row > column > module itself, so neither
+# element is ever emitted and those declarations go looking for markup that
+# does not exist. The rows are explicitly full-bleed (the module settings
+# emit width:100% !important and max-width:none !important), so without this
+# the prose runs the whole width of the viewport and touches both edges.
+# Re-aim the two containers at the wrappers Divi does build.
+CONTAINER_OVERRIDE = """
+/* ---------- transform 8: .wrap and .side lost their elements ---------- */
+.SCOPE .et_pb_row{
+  max-width:1180px !important;
+  margin-inline:auto !important;
+  padding-inline:var(--rail);
+}
+.SCOPE .side-head-wrap{ padding-block:clamp(1.6rem,4vw,2.6rem) 0; }
+"""
+
+# Classes the layout deliberately does not carry. Each is a decision, and
+# the orphan check below has to be able to tell a decision from an oversight.
+DROPPED = {
+    "back", "langs", "topbar",   # the language bar went with the i18n layer
+    "strip", "tile",             # the archive ships as a heading, no tiles yet
+    "list",                      # only ever carried grid-area; grid retired
+    "button",                    # the CTA uses the theme's .h-btn instead
+}
+# Added by the tonearm at runtime, so never present in the emitted markup.
+RUNTIME = {"playing", "live", "on"}
+# Re-homed onto Divi's own wrappers by transform 8 above.
+REAIMED = {"wrap", "side"}
+# Wrappers Divi itself builds around every module.
+DIVI_BUILT = {"et_pb_row", "et_pb_column", "et_pb_column_2_3",
+              "et_pb_column_1_3", "et_pb_code", "et_pb_code_inner",
+              "et_pb_text"}
+
+
 def build(html):
     js = "\n".join(re.findall(r"<script[^>]*>(.*?)</script>", html, re.S))
     css = "\n".join(re.findall(r"<style[^>]*>(.*?)</style>", html, re.S))
@@ -390,8 +427,9 @@ def build(html):
         raise Fail("could not find the Google Fonts link - g2.html has changed shape")
     font_url = m.group(1).replace("&amp;", "&")
 
-    override = (STAGE_OVERRIDE.replace(".SCOPE", "." + SCOPE)
-                              .replace(".ROW", "." + STAGE_ROW))
+    override = ((STAGE_OVERRIDE + CONTAINER_OVERRIDE)
+                .replace(".SCOPE", "." + SCOPE)
+                .replace(".ROW", "." + STAGE_ROW))
     style = ('<style>\n@import url("%s");\n%s\n%s</style>'
              % (font_url, scope_css(css, SCOPE), override))
 
@@ -606,6 +644,34 @@ def verify(shortcode, expect):
     if "transform 6" not in css:
         raise Fail("css: the stage override block is missing - Divi's floated "
                    "columns would win and sticky would have no height chain")
+    if "transform 8" not in css:
+        raise Fail("css: the container override is missing - the rows are "
+                   "full-bleed, so the prose would span the whole viewport")
+
+    # --- every scoped rule still has markup to land on -----------------
+    # Splitting one page across Divi modules silently orphans any rule whose
+    # element was a container the source drew and Divi does not. Nothing
+    # errors: the rule ships, matches nothing, and the layout is quietly
+    # wrong. That is how .wrap took the page's measure and rail padding with
+    # it. Every class a rule targets must therefore be accounted for - in the
+    # markup, built by Divi, added at runtime, or listed above as a decision.
+    markup = re.sub(r"<style>.*?</style>|<script>.*?</script>", "",
+                    shortcode, flags=re.S)
+    present = set()
+    for group in re.findall(r'(?:module_)?class="([^"]+)"', markup):
+        present |= set(group.split())
+    known = present | DIVI_BUILT | RUNTIME | REAIMED | DROPPED
+    orphans = set()
+    for sel, _ in css_rules(css):
+        for one in sel.split(","):
+            orphans |= {c for c in re.findall(r"\.([A-Za-z][\w-]*)", one)
+                        if c not in known}
+    if orphans:
+        raise Fail("css: %d rule target(s) match no element in the layout: %s"
+                   " - either the markup that carried them was dropped, or a "
+                   "container the source drew is one Divi does not build. Give"
+                   " each one a home or list it as a decision."
+                   % (len(orphans), ", ".join(sorted(orphans))))
 
     # --- the JS contract holds ----------------------------------------
     chapters = len(re.findall(r'module_class="[^"]*\b%s\b' % CHAPTER, shortcode))
@@ -649,7 +715,8 @@ def main():
     print("checks     scope clean (incl. @media), every token defined,")
     print("           universal reset intact, tags balanced,")
     print("           nesting section > row > column > module, i18n gone,")
-    print("           builder guard present, chapter list off the module class")
+    print("           builder guard present, chapter list off the module class,")
+    print("           every scoped rule still has an element to match")
 
 
 if __name__ == "__main__":
