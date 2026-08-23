@@ -1,0 +1,2610 @@
+<!DOCTYPE html>
+<!--
+  g4 · Glitta - the start page as one file
+  ============================================================
+  A standalone render of glitta.rocks (the Divi start page) with
+  React Bits animations on top. Sibling of g2.html: no build step,
+  no dependencies, no npm - open it and it runs.
+
+  Where the React Bits parts came from
+  ------------------------------------
+  Fetched from the shadcn registry the CLI would use, i.e. the
+  JSON behind `bun x --bun shadcn@latest add @react-bits/<name>`:
+
+      https://reactbits.dev/r/SplashCursor-JS-CSS.json   (35 KB, deps: [])
+      https://reactbits.dev/r/Noise-JS-CSS.json          (deps: [])
+      https://reactbits.dev/r/StarBorder-JS-CSS.json     (deps: [])
+      https://reactbits.dev/r/SpotlightCard-JS-CSS.json  (deps: [])
+      https://reactbits.dev/r/GlareHover-JS-CSS.json     (deps: [])
+      https://reactbits.dev/r/Magnet-JS-CSS.json         (deps: [])
+
+  Only zero-dependency components are here on purpose. The pretty
+  text ones - GradientText, ShinyText, DecryptedText, SplitText -
+  all pull `motion` or `gsap`, which without a bundler means a CDN
+  script tag, and this page makes no third-party JS request. The text
+  shimmer that GradientText/ShinyText give you is a background-clip
+  animation anyway; `.shiny` below does it in eight lines of CSS.
+
+  What the React → vanilla port changed
+  -------------------------------------
+  1. SplashCursor is one component whose whole body lives inside a
+     single useEffect. So: `useEffect(() => {…}, [])` becomes
+     `initSplashCursor(canvas, options)`, the prop signature becomes
+     the destructuring defaults (verbatim, all 16), `canvasRef.current`
+     becomes the passed canvas, `animationFrameId.current` becomes a
+     local `rafId`, and the effect's cleanup return becomes the
+     `destroy()` on the object this returns - alongside `pause()` and
+     `resume()`, so a sim penned into a section can stop dead while
+     that section is off screen. The 1000 lines of WebGL between those
+     two ends are untouched; `AUTO_SPLAT_MS` (default 0) and those two
+     controls are the only things added.
+  2. The demo wraps SplashCursor in a 1080×1080 div. That box is the
+     demo cage, not the component - here the canvas is fixed to the
+     viewport with pointer-events:none, so the fluid follows the
+     cursor down the whole page. The parameters are the ones from
+     the Background Studio, exactly as given.
+  3. StarBorder, SpotlightCard and GlareHover are markup + CSS with
+     almost no logic; their JSX became plain markup and their CSS
+     moved into the sheet below, repainted from the library's
+     black/#222/white onto the night palette. SpotlightCard's one
+     handler (set --mouse-x/--mouse-y) and Magnet's (translate the
+     inner element toward the pointer) are mounted by data-attribute
+     instead of by JSX props.
+
+  What is *not* here that the theme has
+  -------------------------------------
+  tod.js's drifting spores. The fluid is the ambient particle layer
+  now; running both is soup. Everything else from the theme survives:
+  laser sweeps, torch glow, neon flicker-on titles, scroll reveals,
+  pointer tilt, the living equalizer.
+
+  Two deliberate departures from the live page
+  --------------------------------------------
+  - The gallery drops its captions. On glitta.rocks they render the
+    media-library filenames ("Pasted image (13)", "104_LwGGe2DTx8"),
+    which is a leak, not content. Alt text carries the a11y load.
+  - Fonts come from Google here, like g2.html. The WordPress theme
+    embeds the same three faces as data URIs and makes no external
+    request at all; that is a theme concern, not a preview one.
+
+  Two gates decide what actually runs
+  -----------------------------------
+  - prefers-reduced-motion: reduce -> nothing moves. The class the
+    hiding rules hang off is never added, so every word stays visible
+    and still, and the titles keep their text instead of being cut
+    into per-character spans.
+  - (hover: hover) and (pointer: fine) -> no cursor, no cursor
+    effects. SplashCursor is named for a cursor and a phone has none;
+    a finger drag is already a scroll, so the splat would fight the
+    gesture rather than follow it. Magnet has the same problem. Those
+    three - fluid, grain, magnet - are also the only expensive things
+    on the page, so a phone gets the whole night in CSS (laser sweeps,
+    torch glow, flicker-on, reveals, StarBorder, equalizer) and none
+    of the cost.
+
+    GlareHover and SpotlightCard need a third answer. Both hang off
+    :hover, so on a phone they are not cheap - they are inert. There
+    they keep their markup and CSS and get an IntersectionObserver
+    instead of a pointer: the sheen loops while a photo is on screen,
+    and a card in view holds a soft glow. Same components, the only
+    trigger a touch device can actually give them.
+
+    And where the fluid is switched off, the hero would otherwise have
+    nothing adrift in it - so the spores come back, ported from the
+    theme's tod.js, in the header only. One atmosphere per device:
+    fluid across the whole page for a cursor, spores in the header for
+    a thumb. Never both; that was always soup.
+
+  The nav links get their own row under 46rem rather than being
+  hidden. The theme hides them there because WordPress supplies
+  Divi's mobile menu underneath; one standalone file has nothing to
+  fall back on, and a page with no navigation is not a design choice.
+-->
+<html lang="en" data-theme="pink">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Glitta · behind the decks</title>
+<meta name="description" content="Glitta - DJ, one of the mothers of TiTis on Decks, Algarve. Sets, dates, photos, booking." />
+<meta name="color-scheme" content="dark" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Sora:wght@300;400;600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   1 · TOKENS - the pink night, straight from assets/css/tod.css
+   ============================================================ */
+:root{
+  --coal:#08041a;            /* void indigo - the night   */
+  --coal-2:#0e0826;
+  --sun:#ff3ecf;             /* neon magenta - primary    */
+  --ember:#8a5cff;           /* UV violet                 */
+  --uvy:#37f5e0;             /* bioluminescent cyan       */
+  --acid:#b8ff2e;            /* acid green - rare pop     */
+  --cream:#f0e9ff;
+  --cream-dim:#a99cc9;
+  --line:rgba(158,120,255,.22);
+
+  --sun-rgb:255 62 207;
+  --ember-rgb:138 92 255;
+  --uvy-rgb:55 245 224;
+  --acid-rgb:184 255 46;
+  --coal-rgb:8 4 26;
+  --raise-rgb:14 8 38;
+
+  --bg-glow-a:#1a0f3d;
+  --bg-glow-b:#120a30;
+  --finale-grad:linear-gradient(180deg,var(--coal) 0%,#170d3c 22%,#3c1e63 44%,#83407e 62%,#d4718b 76%,#ffb98a 88%,#ffd9a8 100%);
+  --finale-ink:#2a1245;
+  --finale-sub:rgba(255,244,235,.92);
+  --river-grad:linear-gradient(180deg,#7fb0a2,#4a7a70);
+  --river-ink:#eafff7;
+
+  /* EMOTIQ (© Enxyclo) stays first: a machine that has it, uses it.
+     Audiowide is the free stand-in the theme ships. */
+  --font-display:'EMOTIQ','Audiowide','Monoton','Arial Black',sans-serif;
+  --font-body:'Sora','Avenir Next','Segoe UI',sans-serif;
+  --font-mono:'Space Mono','Courier New',monospace;
+
+  --step-0:clamp(.95rem,.9rem + .25vw,1.05rem);
+  --step-1:clamp(1.2rem,1.1rem + .5vw,1.5rem);
+  --step-2:clamp(1.6rem,1.3rem + 1.4vw,2.4rem);
+  --step-3:clamp(2.2rem,1.6rem + 3vw,4rem);
+
+  --pad:clamp(1.25rem,4vw,3rem);
+  --measure:62ch;
+}
+
+/* ============================================================
+   2 · BASE
+   ============================================================ */
+*,*::before,*::after{ box-sizing:border-box; }
+
+html{
+  scroll-behavior:smooth;
+  scroll-padding-top:4.5rem;
+  background:var(--coal);
+}
+
+body{
+  margin:0;
+  font-family:var(--font-body);
+  font-size:var(--step-0);
+  line-height:1.7;
+  color:var(--cream);
+  background:
+    radial-gradient(120vw 90vh at 72% -12%,var(--bg-glow-a) 0%,transparent 60%),
+    radial-gradient(90vw 70vh at 6% 28%,var(--bg-glow-b) 0%,transparent 55%),
+    var(--coal);
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+::selection{ background:var(--sun); color:var(--coal); }
+
+a{ color:var(--sun); text-decoration-color:rgb(var(--sun-rgb)/.4); }
+a:hover{ text-decoration-color:var(--sun); }
+
+:focus-visible{ outline:2px solid var(--uvy); outline-offset:3px; border-radius:2px; }
+
+img{ max-width:100%; }
+h1,h2,h3{ text-wrap:balance; }
+
+/* the page rides above the grain, below the fluid */
+.g4-page{ position:relative; z-index:2; }
+
+.skip{
+  position:absolute; left:-999px; top:0; z-index:60;
+  background:var(--coal); color:var(--uvy); padding:.7rem 1rem;
+  font-family:var(--font-mono); font-size:.78rem;
+}
+.skip:focus{ left:.5rem; top:.5rem; }
+
+/* ============================================================
+   3 · NAV - fixed, fades into the night
+   ============================================================ */
+.nav{
+  position:fixed; inset:0 0 auto 0; z-index:40;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:1rem; padding:.8rem var(--pad);
+  background:linear-gradient(rgb(var(--coal-rgb)/.93),rgb(var(--coal-rgb)/.55) 70%,transparent);
+  backdrop-filter:blur(6px);
+}
+
+.nav-mark{
+  display:flex; align-items:center; gap:.6rem; margin:0;
+  font-family:var(--font-mono); font-weight:700; font-size:.95rem;
+  letter-spacing:.12em; color:var(--cream); text-decoration:none;
+}
+.nav-mark b{ font-weight:700; }
+.nav-mark span{ color:var(--sun); text-shadow:0 0 14px rgb(var(--sun-rgb)/.8); }
+
+.nav-links{
+  display:flex; gap:clamp(.8rem,2.5vw,2rem); margin:0;
+  font-family:var(--font-mono); font-size:.78rem;
+  letter-spacing:.14em; text-transform:uppercase;
+}
+.nav-links a{ color:var(--cream-dim); text-decoration:none; padding:.2rem 0; }
+.nav-links a:hover{ color:var(--uvy); text-shadow:0 0 12px rgb(var(--uvy-rgb)/.7); }
+
+/* ============================================================
+   4 · HERO - the artist page (kicker → name → portrait → intro)
+   ============================================================ */
+.hero{
+  position:relative; isolation:isolate;
+  min-height:100svh; overflow:hidden;
+  display:grid; align-content:center;
+}
+
+/* slow UV-glow breathing behind the title */
+.hero::before{
+  content:""; position:absolute; inset:0; z-index:-3; pointer-events:none;
+  background:
+    radial-gradient(46rem 30rem at 50% 58%,rgb(var(--ember-rgb)/.17),transparent 70%),
+    radial-gradient(30rem 20rem at 32% 40%,rgb(var(--sun-rgb)/.1),transparent 70%);
+  animation:torch 7s ease-in-out infinite alternate;
+}
+@keyframes torch{
+  from{ opacity:.65; transform:scale(1); }
+  55%{ opacity:1; }
+  to{ opacity:.8; transform:scale(1.06); }
+}
+
+/* A SplashCursor bed scoped to one section - the fluid from the demo,
+   sized to its host instead of the viewport. Touch only: a cursor
+   device already has the fluid across the whole page. */
+.fluid-bed{ position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+.fluid-bed canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+#story > *:not(.fluid-bed),
+#contact > *:not(.fluid-bed){ position:relative; z-index:1; }
+
+/* spores drift up in here on touch devices - canvas injected by JS.
+   z-index 0 puts them above the lasers (-1) and below the copy (1),
+   exactly where .tod-atmo sits in the theme. */
+.atmo{ position:absolute; inset:0; z-index:0; pointer-events:none; }
+.atmo canvas{ position:absolute; inset:0; width:100%; height:100%; }
+
+/* laser fans sweeping from the top corners */
+.laser{
+  position:absolute; top:-10%; width:200vmax; height:2px; z-index:-1;
+  opacity:.5; transform-origin:0 0; pointer-events:none;
+}
+.laser::before{ content:""; position:absolute; inset:-1px 0; filter:blur(1px); background:inherit; }
+.laser-a{ left:-4%; background:linear-gradient(90deg,var(--sun),transparent 70%);  animation:sweep-a 11s ease-in-out infinite alternate; }
+.laser-b{ left:-4%; background:linear-gradient(90deg,var(--uvy),transparent 70%);  animation:sweep-b 13s ease-in-out infinite alternate; }
+.laser-c{ right:-4%; background:linear-gradient(90deg,var(--acid),transparent 70%); transform-origin:100% 0; animation:sweep-c 17s ease-in-out infinite alternate; }
+@keyframes sweep-a{ from{ transform:rotate(18deg); }  to{ transform:rotate(64deg); } }
+@keyframes sweep-b{ from{ transform:rotate(55deg); }  to{ transform:rotate(24deg); } }
+@keyframes sweep-c{ from{ transform:rotate(118deg); } to{ transform:rotate(162deg); } }
+
+.hero-main{
+  position:relative; z-index:1;
+  max-width:44rem; margin:0 auto;
+  padding:clamp(4.5rem,12vh,7rem) var(--pad) clamp(3rem,9vh,6rem);
+  display:grid; gap:1.4rem; justify-items:center; text-align:center;
+}
+
+.hero-kicker{
+  margin:0; font-family:var(--font-mono); font-size:.75rem;
+  letter-spacing:.4em; text-transform:uppercase; color:var(--uvy);
+  filter:drop-shadow(0 0 10px rgb(var(--uvy-rgb)/.5));
+}
+
+.hero-title{
+  margin:0; font-family:var(--font-display); font-weight:400;
+  font-size:clamp(3rem,12vw,6.5rem); line-height:1;
+  text-transform:uppercase; color:var(--cream);
+  text-shadow:0 0 24px rgb(var(--sun-rgb)/.85),0 0 80px rgb(var(--ember-rgb)/.5);
+}
+
+.hero-tagline{
+  margin:0; max-width:34ch;
+  font-family:var(--font-mono); font-size:.8rem;
+  letter-spacing:.08em; color:var(--cream-dim);
+}
+
+.hero-figure{
+  width:min(22rem,82vw); margin:.4rem 0 0;
+  border-radius:12px; overflow:hidden;
+  box-shadow:0 24px 70px rgb(var(--coal-rgb)/.8),0 0 45px rgb(var(--ember-rgb)/.35);
+}
+.hero-figure img{ display:block; width:100%; height:auto; }
+
+.hero-intro{
+  margin:0; max-width:46ch; color:var(--cream);
+  font-size:var(--step-1); line-height:1.7;
+}
+
+.hero-scroll{
+  margin:1.2rem 0 0; font-family:var(--font-mono); font-size:.68rem;
+  letter-spacing:.3em; text-transform:uppercase; color:var(--cream-dim);
+  text-decoration:none; display:grid; gap:.4rem; justify-items:center;
+}
+.hero-scroll i{ font-style:normal; animation:bob 2.4s ease-in-out infinite; }
+@keyframes bob{ 0%,100%{ transform:translateY(0); opacity:.5; } 50%{ transform:translateY(5px); opacity:1; } }
+
+/* ============================================================
+   5 · BUTTONS - neon pills, wearing StarBorder
+   ============================================================ */
+.cta-row{ display:flex; flex-wrap:wrap; gap:.9rem; justify-content:center; margin-top:.5rem; }
+
+.btn{
+  display:inline-block;
+  font-family:var(--font-mono); font-size:.82rem;
+  letter-spacing:.16em; text-transform:uppercase; text-decoration:none;
+  padding:.85rem 1.6rem; border-radius:999px;
+  border:1px solid var(--sun); color:var(--sun);
+  background:rgb(var(--sun-rgb)/.07);
+  box-shadow:0 0 18px rgb(var(--sun-rgb)/.25),inset 0 0 12px rgb(var(--sun-rgb)/.1);
+  transition:box-shadow 160ms ease,background 160ms ease,color 160ms ease;
+}
+.btn:hover{
+  background:rgb(var(--sun-rgb)/.16); color:var(--sun);
+  box-shadow:0 0 30px rgb(var(--sun-rgb)/.55),inset 0 0 16px rgb(var(--sun-rgb)/.2);
+}
+
+.btn-ghost{
+  border-color:var(--uvy); color:var(--uvy);
+  background:rgb(var(--uvy-rgb)/.06);
+  box-shadow:0 0 18px rgb(var(--uvy-rgb)/.16),inset 0 0 12px rgb(var(--uvy-rgb)/.08);
+}
+.btn-ghost:hover{
+  background:rgb(var(--uvy-rgb)/.13); color:var(--uvy);
+  box-shadow:0 0 30px rgb(var(--uvy-rgb)/.4),inset 0 0 16px rgb(var(--uvy-rgb)/.16);
+}
+
+/* ============================================================
+   6 · SECTION SHELL
+   ============================================================ */
+.section{
+  position:relative;
+  padding:clamp(4rem,10vh,7rem) var(--pad);
+  max-width:72rem; margin:0 auto;
+  display:grid; gap:2.2rem;
+}
+
+.head{ display:grid; gap:.5rem; }
+
+.kicker{
+  margin:0; font-family:var(--font-mono); font-size:.75rem;
+  letter-spacing:.35em; text-transform:uppercase; color:var(--acid);
+  text-shadow:0 0 10px rgb(var(--acid-rgb)/.45);
+}
+
+.h2{
+  margin:0; font-family:var(--font-body); font-weight:800;
+  font-size:var(--step-3); line-height:1.08; letter-spacing:-.015em;
+  color:var(--cream);
+}
+.h2 em{ font-style:normal; color:var(--sun); text-shadow:0 0 22px rgb(var(--sun-rgb)/.6); }
+
+.note{
+  margin:0; font-family:var(--font-mono); font-size:.78rem;
+  line-height:2; color:var(--cream-dim);
+}
+
+/* ============================================================
+   7 · STORY
+   ============================================================ */
+.story-grid{
+  display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);
+  gap:clamp(1.5rem,4vw,3.5rem); align-items:start;
+}
+
+.statement{
+  margin:0; max-width:30ch;
+  font-family:var(--font-body); font-weight:800;
+  font-size:var(--step-2); line-height:1.22; color:var(--cream);
+}
+.statement em{ font-style:normal; color:var(--uvy); text-shadow:0 0 20px rgb(var(--uvy-rgb)/.55); }
+
+.copy{ max-width:var(--measure); display:grid; gap:1rem; }
+.copy p{ margin:0; color:var(--cream-dim); }
+.copy strong{ color:var(--cream); font-weight:600; }
+
+.genres{ display:flex; flex-wrap:wrap; gap:.6rem; margin:1.4rem 0 0; padding:0; list-style:none; }
+.genres li{
+  font-family:var(--font-mono); font-size:.75rem;
+  letter-spacing:.14em; text-transform:uppercase;
+  padding:.42rem .9rem; border-radius:999px;
+  border:1px solid var(--line); color:var(--cream-dim);
+  background:rgb(var(--raise-rgb)/.55);
+  transition:color 160ms ease,border-color 160ms ease,box-shadow 160ms ease,transform 160ms ease;
+}
+.genres li:hover{
+  color:var(--coal); border-color:var(--sun); background:var(--sun);
+  box-shadow:0 0 22px rgb(var(--sun-rgb)/.55); transform:translateY(-2px);
+}
+
+/* ============================================================
+   8 · SETS - SoundCloud in night frames
+   ============================================================ */
+.sets{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(20rem,100%),1fr)); gap:1.2rem; }
+
+.set{ display:grid; gap:.8rem; align-content:start; }
+.set-meta{
+  margin:0; font-family:var(--font-mono); font-size:.72rem;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--acid);
+}
+.set-title{ margin:0; font-weight:600; font-size:1.05rem; color:var(--cream); }
+.set iframe{ display:block; width:100%; border:0; border-radius:3px; }
+
+.profiles{
+  display:flex; flex-wrap:wrap; gap:.8rem 1.8rem; margin:0;
+  font-family:var(--font-mono); font-size:.8rem;
+}
+
+/* ============================================================
+   9 · DATES
+   ============================================================ */
+.dates{ display:grid; gap:0; border-top:1px solid var(--line); }
+
+.date{
+  display:flex; flex-wrap:wrap; align-items:baseline;
+  gap:.4rem 1.6rem; margin:0;
+  padding:1rem .9rem; border-bottom:1px solid var(--line);
+  border-radius:0;
+}
+.date-when{
+  margin:0; min-width:11rem;
+  font-family:var(--font-mono); font-size:.78rem;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--uvy);
+  text-shadow:0 0 12px rgb(var(--uvy-rgb)/.5);
+}
+.date-what{ margin:0; font-weight:600; color:var(--cream); }
+.date-where{ margin:0; font-size:.9rem; color:var(--cream-dim); }
+
+/* ============================================================
+   10 · GALLERY
+   ============================================================ */
+.gallery{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(min(15rem,100%),1fr));
+  gap:1.2rem; margin:0; padding:0; list-style:none;
+}
+.gallery img{
+  display:block; width:100%; height:100%;
+  object-fit:cover; aspect-ratio:7/5;
+}
+/* faint CRT scanlines over every tile - the draft's trick */
+.gallery li::after{
+  content:""; position:absolute; inset:0; z-index:2; pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgb(var(--coal-rgb)/.12) 0 1px,transparent 1px 4px);
+}
+
+/* ============================================================
+   11 · BOOKING
+   ============================================================ */
+.booking-intro{ margin:0; max-width:var(--measure); color:var(--cream-dim); }
+.booking .cta-row{ justify-content:flex-start; }
+
+/* ============================================================
+   12 · FINALE + RIVER - night into dawn
+   ============================================================ */
+.finale{
+  position:relative; margin-top:clamp(4rem,10vh,7rem); text-align:center;
+  padding:clamp(6rem,16vh,10rem) var(--pad) clamp(4rem,10vh,6rem);
+  background:var(--finale-grad);
+}
+.finale-inner{ display:grid; gap:1.2rem; justify-items:center; }
+.finale-kicker{
+  margin:0; font-family:var(--font-mono); font-size:.78rem;
+  letter-spacing:.4em; text-transform:uppercase; color:var(--acid);
+}
+.finale-title{
+  margin:0; font-family:var(--font-display); font-weight:400;
+  font-size:clamp(2.1rem,7.5vw,4.4rem); line-height:1.14;
+  text-transform:uppercase; color:#fff;
+  text-shadow:0 0 24px rgb(var(--sun-rgb)/.9),0 0 70px rgb(var(--ember-rgb)/.5);
+}
+.finale-sub{ margin:0; max-width:52ch; color:var(--finale-sub); }
+.finale-links{
+  display:flex; flex-wrap:wrap; gap:1rem 2rem; justify-content:center;
+  margin:.8rem 0 0; font-family:var(--font-mono); font-size:.85rem;
+}
+.finale-links a{ color:var(--finale-ink); text-decoration-color:rgba(42,18,69,.5); font-weight:700; }
+
+.river{ margin:0; padding:1.6rem var(--pad) 2rem; background:var(--river-grad); color:var(--river-ink); }
+.river-inner{
+  max-width:72rem; margin:0 auto;
+  display:flex; flex-wrap:wrap; gap:.5rem 2rem; justify-content:space-between;
+  font-family:var(--font-mono); font-size:.72rem; letter-spacing:.14em;
+}
+.river-inner p{ margin:0; }
+.river-inner a{ color:inherit; }
+
+/* ============================================================
+   13 · REACT BITS - the ported components
+   ============================================================ */
+
+/* --- SplashCursor: the fluid, fixed over the whole page --------
+   The demo cages it in a 1080×1080 div; that is the demo, not the
+   component. pointer-events:none keeps every link underneath live. */
+#fluid{
+  position:fixed; inset:0; z-index:50;
+  width:100vw; height:100vh; display:block;
+  pointer-events:none;
+}
+
+/* --- Noise: the library's grain canvas, fixed instead of absolute
+   so it holds still while the page scrolls ---------------------- */
+#grain{
+  position:fixed; inset:0; z-index:1;
+  width:100vw; height:100vh;
+  image-rendering:pixelated; pointer-events:none;
+}
+
+/* --- StarBorder: two radial gradients travelling the long way
+   around the pill. Library ships black on #222; here the inner
+   content keeps the theme's neon-pill look and only the travelling
+   light is new. ------------------------------------------------- */
+.star-border{
+  display:inline-block; position:relative; overflow:hidden;
+  padding:1px 0; border-radius:999px;
+}
+.star-border > .star-bottom,
+.star-border > .star-top{
+  position:absolute; width:300%; height:50%;
+  opacity:.7; border-radius:50%; z-index:0; pointer-events:none;
+  /* the library passes colour and speed as inline props; here they
+     are custom properties, so a ghost button only overrides one */
+  background:radial-gradient(circle,var(--star-color,var(--sun)),transparent 10%);
+  animation-duration:var(--star-speed,6s);
+}
+.star-border > .star-bottom{ bottom:-11px; right:-250%; animation-name:star-bottom; animation-timing-function:linear; animation-iteration-count:infinite; animation-direction:alternate; }
+.star-border > .star-top{    top:-11px;    left:-250%;  animation-name:star-top;    animation-timing-function:linear; animation-iteration-count:infinite; animation-direction:alternate; }
+.star-border > .btn{ position:relative; z-index:1; }
+
+@keyframes star-bottom{ 0%{ transform:translate(0,0); opacity:1; } 100%{ transform:translate(-100%,0); opacity:0; } }
+@keyframes star-top{    0%{ transform:translate(0,0); opacity:1; } 100%{ transform:translate(100%,0);  opacity:0; } }
+
+/* --- SpotlightCard: radial glow tracking the pointer ----------- */
+.spotlight{
+  position:relative; overflow:hidden;
+  --mouse-x:50%; --mouse-y:50%;
+  --spotlight-color:rgb(var(--sun-rgb)/.22);
+  border:1px solid var(--line); border-radius:4px;
+  padding:1.2rem;
+  background:linear-gradient(170deg,rgb(var(--raise-rgb)/.9),rgb(var(--coal-rgb)/.6));
+  transition:border-color 160ms ease,box-shadow 160ms ease,transform 160ms ease;
+}
+.spotlight::before{
+  content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+  background:radial-gradient(circle at var(--mouse-x) var(--mouse-y),var(--spotlight-color),transparent 80%);
+  opacity:0; transition:opacity .5s ease;
+}
+.spotlight:hover::before,
+.spotlight:focus-within::before{ opacity:.75; }
+.spotlight:hover{ border-color:var(--sun); box-shadow:0 0 26px rgb(var(--sun-rgb)/.22); transform:translateY(-2px); }
+.spotlight > *{ position:relative; z-index:1; }
+
+/* the date rows are spotlights too, but flat - a table, not a card */
+.spotlight-row{
+  background:none; border:0; border-bottom:1px solid var(--line); border-radius:0;
+  --spotlight-color:rgb(var(--uvy-rgb)/.16);
+}
+.spotlight-row:hover{ border-color:transparent; border-bottom-color:var(--uvy); box-shadow:none; transform:none; }
+
+/* --- GlareHover: a sheen sweeping across on hover -------------- */
+.glare{
+  position:relative; overflow:hidden;
+  border:1px solid var(--line); border-radius:4px;
+  background:var(--coal-2);
+  --gh-angle:-45deg;
+  --gh-duration:650ms;
+  --gh-size:250%;
+  --gh-rgba:rgb(var(--uvy-rgb)/.35);
+}
+.glare::before{
+  content:""; position:absolute; inset:0; z-index:3; pointer-events:none;
+  background:linear-gradient(var(--gh-angle),
+    hsla(0,0%,0%,0) 60%,
+    var(--gh-rgba) 70%,
+    hsla(0,0%,0%,0),
+    hsla(0,0%,0%,0) 100%);
+  background-size:var(--gh-size) var(--gh-size),100% 100%;
+  background-repeat:no-repeat;
+  background-position:-100% -100%,0 0;
+  transition:var(--gh-duration) ease;
+}
+.glare:hover::before{ background-position:100% 100%,0 0; }
+.glare:hover{ border-color:var(--ember); }
+
+/* --- Magnet: wrapper is static, inner one gets the translate --- */
+.magnet{ position:relative; display:inline-block; }
+.magnet-inner{ display:inline-block; will-change:transform; transition:transform .5s ease-in-out; }
+.magnet.is-pulled .magnet-inner{ transition:transform .3s ease-out; }
+
+/* ============================================================
+   14 · THE THEME'S OWN EFFECTS - armed by JS adding .g4-js
+   ============================================================ */
+
+/* neon flicker-on, character by character */
+.split{ display:inline-block; }
+html.g4-js .split .word{ display:inline-block; white-space:nowrap; }
+html.g4-js .split .char{ display:inline-block; opacity:0; }
+html.g4-js .split.is-on .char{ animation:flicker .7s ease-out both; animation-delay:calc(var(--i) * .045s); }
+@keyframes flicker{
+  0%{ opacity:0; transform:translateY(.35em); filter:blur(6px); }
+  55%{ opacity:1; transform:translateY(0); filter:blur(0); }
+  75%{ opacity:.35; }
+  100%{ opacity:1; transform:translateY(0); filter:blur(0); }
+}
+
+/* scroll-into-view fade + rise. Animates `translate`, not
+   `transform`, so a card can reveal and tilt at once. */
+html.g4-js .reveal{ opacity:0; translate:0 26px; transition:opacity .7s ease-out,translate .7s ease-out; }
+html.g4-js .reveal.is-in{ opacity:1; translate:none; }
+
+/* pointer tilt + glare */
+.tilt{ position:relative; transform-style:preserve-3d; will-change:transform; }
+html.g4-js .tilt{ transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)); transition:transform 120ms ease-out; }
+.tilt .tilt-glare{
+  position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background:radial-gradient(230px circle at var(--gx,50%) var(--gy,50%),rgba(240,233,255,.13),transparent 65%);
+}
+
+/* the living equalizer */
+.wave{ display:flex; align-items:flex-end; gap:4px; height:26px; }
+.wave i{
+  width:3px; height:var(--h,16px); border-radius:2px;
+  background:linear-gradient(180deg,var(--uvy),var(--ember));
+  box-shadow:0 0 8px rgb(var(--sun-rgb)/.55);
+  transform-origin:bottom;
+  animation:wave-pulse var(--d,1.3s) ease-in-out infinite;
+  animation-delay:var(--dl,0s);
+}
+@keyframes wave-pulse{
+  0%,100%{ transform:scaleY(.35); }
+  25%{ transform:scaleY(1); }
+  50%{ transform:scaleY(.5); }
+  75%{ transform:scaleY(.85); }
+}
+
+/* light sweep across text - what GradientText/ShinyText do,
+   without pulling `motion` in to do it */
+.shiny{
+  background:linear-gradient(120deg,currentcolor 38%,#fff 50%,currentcolor 62%);
+  background-size:220% 100%;
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:shine 4.5s linear infinite;
+}
+@keyframes shine{ from{ background-position:180% 0; } to{ background-position:-40% 0; } }
+
+/* --- touch: the two hover-driven bits, driven by the viewport ---
+   GlareHover and SpotlightCard both hang off :hover, and a touch device
+   never delivers one - so on a phone they are inert markup rather than
+   effects. Same components, same declarations; an IntersectionObserver
+   supplies the trigger the pointer cannot. Scoped to touch so the
+   pointer-driven behaviour is untouched on desktop. */
+@media (hover:none),(pointer:coarse){
+  /* Brighter and quicker than the desktop hover versions, deliberately.
+     A cursor rests on a tile for seconds; a scrolling thumb gives it a
+     fraction of one, so the hover values are not subtle on a phone -
+     they are invisible. Sheen 0.35 -> 0.55 alpha, 650ms -> 480ms; the
+     card glow 0.45 -> 0.8 opacity over a stronger tint, plus the edge
+     lift the pointer version gets on hover. */
+  .glare{ --gh-rgba:rgb(var(--uvy-rgb)/.55); }
+
+  /* A sweep fired once on arrival cannot survive every scroll speed:
+     fling past and the window is missed, and any lead time big enough
+     to fix that makes it finish before the tile arrives on a slow
+     scroll. So on touch the sheen is an animation rather than a
+     transition, running only while the tile is actually in view - at
+     any speed there is always another pass coming. */
+  .glare.is-swept::before{
+    animation:glare-sweep 3.2s var(--glare-delay,0s) ease-in-out infinite;
+  }
+  .glare.is-swept{ border-color:var(--ember); }
+
+  @keyframes glare-sweep{
+    0%   { background-position:-100% -100%,0 0; }
+    38%  { background-position:100% 100%,0 0; }
+    100% { background-position:100% 100%,0 0; }
+  }
+
+  .spotlight{ --spotlight-color:rgb(var(--sun-rgb)/.5); }
+  .spotlight.is-lit::before{ opacity:.8; }
+  .spotlight.is-lit{
+    border-color:rgb(var(--sun-rgb)/.6);
+    box-shadow:0 0 26px rgb(var(--sun-rgb)/.18);
+  }
+  .spotlight-row{ --spotlight-color:rgb(var(--uvy-rgb)/.38); }
+  .spotlight-row.is-lit{
+    border-color:transparent; border-bottom-color:var(--uvy); box-shadow:none;
+  }
+}
+
+/* --- no cursor, no cursor effects ------------------------------
+   The JS never starts the two canvases on a touch device (see
+   HAS_CURSOR below); this keeps them out of the layer tree too. */
+@media (hover:none),(pointer:coarse){
+  #fluid,#grain{ display:none; }
+}
+
+/* ============================================================
+   15 · RESPONSIVE
+   ============================================================ */
+@media (max-width:46rem){
+  .story-grid{ grid-template-columns:1fr; }
+  .date-when{ min-width:0; }
+  .nav-mark .wave{ display:none; }
+
+  /* The theme hides these here, because WordPress supplies Divi's
+     mobile menu underneath. A standalone file has nothing to fall
+     back on, so they take their own row instead of disappearing. */
+  html{ scroll-padding-top:6rem; }
+  .nav{ flex-wrap:wrap; justify-content:center; gap:.3rem 1rem; padding-bottom:.65rem; }
+  .nav-links{ width:100%; justify-content:space-between; gap:.5rem; font-size:.7rem; letter-spacing:.08em; }
+}
+
+/* ============================================================
+   16 · REDUCED MOTION - the night stands still
+   ============================================================ */
+@media (prefers-reduced-motion:reduce){
+  html{ scroll-behavior:auto; }
+  .laser{ animation:none; opacity:.25; }
+  .hero::before{ animation:none; }
+  .hero-scroll i{ animation:none; }
+  .wave i{ animation:none; }
+  .genres li,.spotlight,.btn{ transition:none; }
+  .star-border > .star-bottom,
+  .star-border > .star-top{ animation:none; opacity:.35; }
+  .glare::before{ transition:none; }
+  .shiny{ animation:none; -webkit-text-fill-color:currentcolor; background:none; }
+  html.g4-js .split .char{ opacity:1; animation:none; }
+  html.g4-js .reveal{ opacity:1; translate:none; transition:none; }
+  html.g4-js .tilt{ transform:none; transition:none; }
+  #fluid,#grain{ display:none; }
+}
+</style>
+</head>
+<body>
+
+<a class="skip" href="#story">Skip to content</a>
+
+<!-- React Bits · Noise - grain over the night, under everything else -->
+<canvas id="grain" aria-hidden="true"></canvas>
+
+<!-- React Bits · SplashCursor - the fluid, over everything, catching nothing -->
+<canvas id="fluid" aria-hidden="true"></canvas>
+
+<header class="nav">
+  <a class="nav-mark" href="#top">
+    <b>GLITTA</b> <span>&#10022;</span>
+    <span class="wave" aria-hidden="true"></span>
+  </a>
+  <nav class="nav-links" aria-label="Sections">
+    <a href="#story">Story</a>
+    <a href="#sets">Sets</a>
+    <a href="#dates">Dates</a>
+    <a href="#photos">Photos</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<div class="g4-page">
+<main>
+
+  <!-- ========== HERO ========== -->
+  <section class="hero" id="top">
+    <div class="atmo" aria-hidden="true"></div>
+    <span class="laser laser-a" aria-hidden="true"></span>
+    <span class="laser laser-b" aria-hidden="true"></span>
+    <span class="laser laser-c" aria-hidden="true"></span>
+
+    <div class="hero-main">
+      <p class="hero-kicker">DJ &middot; TiTis on Decks &middot; Algarve</p>
+
+      <h1 class="hero-title"><span class="split">Glitta</span></h1>
+
+      <p class="hero-tagline">behind the decks, somewhere between midnight and morning</p>
+
+      <figure class="hero-figure tilt reveal">
+        <img src="https://glitta.rocks/wp-content/uploads/2026/08/glitta.jpg"
+             alt="Glitta" width="900" height="1200" decoding="async" />
+      </figure>
+
+      <p class="hero-intro">
+        Different sounds. Different characters. One shared frequency -
+        and this one is mine.
+      </p>
+
+      <div class="cta-row">
+        <span class="magnet" data-magnet>
+          <span class="magnet-inner">
+            <span class="star-border" style="--star-speed:6s">
+              <span class="star-bottom" aria-hidden="true"></span>
+              <span class="star-top" aria-hidden="true"></span>
+              <a class="btn" href="#sets">My Sets</a>
+            </span>
+          </span>
+        </span>
+        <span class="magnet" data-magnet>
+          <span class="magnet-inner">
+            <span class="star-border" style="--star-speed:8s;--star-color:var(--uvy)">
+              <span class="star-bottom" aria-hidden="true"></span>
+              <span class="star-top" aria-hidden="true"></span>
+              <a class="btn btn-ghost" href="#contact">Booking</a>
+            </span>
+          </span>
+        </span>
+      </div>
+
+      <a class="hero-scroll" href="#story">Scroll <i>&darr;</i></a>
+    </div>
+  </section>
+
+  <!-- ========== STORY ========== -->
+  <section class="section" id="story">
+    <div class="fluid-bed" aria-hidden="true"></div>
+    <div class="head reveal">
+      <p class="kicker">The Story</p>
+      <h2 class="h2">One of the mothers of <em>TiTis on Decks</em></h2>
+    </div>
+
+    <div class="story-grid">
+      <div class="reveal">
+        <p class="statement">Different sounds. <em>One frequency.</em></p>
+        <ul class="genres">
+          <li>House</li>
+          <li>Acid Trance</li>
+          <li>Techno</li>
+          <li>Acid Techno</li>
+        </ul>
+      </div>
+
+      <div class="copy reveal">
+        <p>
+          With <strong>Lutzi</strong> I founded TiTis on Decks - a female DJ
+          collective born in the Algarve night. This page is my own side of
+          that story.
+        </p>
+        <p>
+          This paragraph is yours, Glitta: how you found your way to the decks,
+          what pulls you into the night, the floors that shaped you. Just click
+          and write over it.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== SETS ========== -->
+  <section class="section" id="sets">
+    <div class="head reveal">
+      <p class="kicker">The Sound</p>
+      <h2 class="h2">Sets that carry <em>the night</em></h2>
+    </div>
+
+    <div class="sets">
+      <article class="set spotlight reveal" data-spotlight>
+        <p class="set-meta">154 min &middot; Glitta b2b Lutzi</p>
+        <h3 class="set-title">3 Empresses</h3>
+        <iframe title="3 Empresses - Glitta b2b Lutzi on SoundCloud"
+                height="300" scrolling="no" frameborder="no" loading="lazy"
+                allow="autoplay; encrypted-media"
+                src="https://w.soundcloud.com/player/?visual=true&amp;url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F2222797898&amp;show_artwork=true&amp;color=%23ff3ecf"></iframe>
+      </article>
+
+      <article class="set spotlight reveal" data-spotlight>
+        <p class="set-meta">118 min &middot; Live</p>
+        <h3 class="set-title">WONDERLAND Market, May 2026</h3>
+        <iframe title="WONDERLAND Market, May 2026 - Glitta live on SoundCloud"
+                height="300" scrolling="no" frameborder="no" loading="lazy"
+                allow="autoplay; encrypted-media"
+                src="https://w.soundcloud.com/player/?visual=true&amp;url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F2337650513&amp;show_artwork=true&amp;color=%23ff3ecf"></iframe>
+      </article>
+    </div>
+
+    <p class="profiles reveal">
+      <a href="https://soundcloud.com/glittawicca" rel="me noopener" target="_blank">soundcloud.com/glittawicca</a>
+      <a href="https://soundcloud.com/titisondecks" rel="noopener" target="_blank">soundcloud.com/titisondecks</a>
+    </p>
+
+    <p class="note reveal">
+      New set? Duplicate a card column, swap title and the track id in the player url.
+    </p>
+  </section>
+
+  <!-- ========== DATES ========== -->
+  <section class="section" id="dates">
+    <div class="head reveal">
+      <p class="kicker">Dates</p>
+      <h2 class="h2">Where the <em>dancing</em> is</h2>
+    </div>
+
+    <div class="dates reveal">
+      <article class="date spotlight spotlight-row" data-spotlight>
+        <p class="date-when">Sat &middot; DD.MM.YYYY</p>
+        <p class="date-what">Name of the night</p>
+        <p class="date-where">Venue &middot; Place</p>
+      </article>
+      <article class="date spotlight spotlight-row" data-spotlight>
+        <p class="date-when">Fri &middot; DD.MM.YYYY</p>
+        <p class="date-what">Another night</p>
+        <p class="date-where">Venue &middot; Place</p>
+      </article>
+    </div>
+
+    <p class="note reveal">
+      New date: duplicate a date row module, swap the texts.
+      Past nights: delete them - or keep them as an archive.
+    </p>
+  </section>
+
+  <!-- ========== MOMENTS ========== -->
+  <section class="section" id="photos">
+    <div class="head reveal">
+      <p class="kicker">Moments</p>
+      <h2 class="h2">Pictures from <em>the night</em></h2>
+    </div>
+
+    <ul class="gallery reveal">
+      <li class="glare"><img src="https://glitta.rocks/wp-content/uploads/2026/08/og-nu-breed.jpg" alt="Nu Breed - the original crew" loading="lazy" decoding="async" /></li>
+      <li class="glare"><img src="https://glitta.rocks/wp-content/uploads/2026/08/dj-closeup-warm-booth-1.jpg" alt="Close up in the booth, warm light" loading="lazy" decoding="async" /></li>
+      <li class="glare"><img src="https://glitta.rocks/wp-content/uploads/2026/08/duo-embrace-decks-smiling-1.jpg" alt="Two DJs embracing at the decks, smiling" loading="lazy" decoding="async" /></li>
+      <li class="glare"><img src="https://glitta.rocks/wp-content/uploads/2026/08/Pasted-image-13.png" alt="A photo from the night" loading="lazy" decoding="async" /></li>
+      <li class="glare"><img src="https://glitta.rocks/wp-content/uploads/2026/08/depressive-disco-kugel-400x284.jpg" alt="Mirror ball over the floor" loading="lazy" decoding="async" /></li>
+      <li class="glare"><img src="https://glitta.rocks/wp-content/uploads/2026/08/104_LwGGe2DTx8-400x284.jpg" alt="A photo from the night" loading="lazy" decoding="async" /></li>
+      <li class="glare"><img src="https://glitta.rocks/wp-content/uploads/2026/08/Pasted-image-12-400x284.png" alt="A photo from the night" loading="lazy" decoding="async" /></li>
+      <li class="glare"><img src="https://glitta.rocks/wp-content/uploads/2026/08/028_62gRT0IhMc-1-400x284.jpg" alt="A photo from the night" loading="lazy" decoding="async" /></li>
+      <li class="glare"><img src="https://glitta.rocks/wp-content/uploads/2026/08/Pasted-image-14-400x284.png" alt="A photo from the night" loading="lazy" decoding="async" /></li>
+      <li class="glare"><img src="https://glitta.rocks/wp-content/uploads/2026/08/031_3prja-BLcy-400x284.jpg" alt="A photo from the night" loading="lazy" decoding="async" /></li>
+      <li class="glare"><img src="https://glitta.rocks/wp-content/uploads/2026/08/027_AfLUE0okxD-400x284.jpg" alt="A photo from the night" loading="lazy" decoding="async" /></li>
+      <li class="glare"><img src="https://glitta.rocks/wp-content/uploads/2026/08/Screenshot-From-2026-07-23-12-41-49-400x284.png" alt="A photo from the night" loading="lazy" decoding="async" /></li>
+      <li class="glare"><img src="https://glitta.rocks/wp-content/uploads/2026/08/084_4qHMSeZMha-400x284.jpg" alt="A photo from the night" loading="lazy" decoding="async" /></li>
+      <li class="glare"><img src="https://glitta.rocks/wp-content/uploads/2026/08/AnniAmazon.png" alt="Anni Amazon" loading="lazy" decoding="async" /></li>
+      <li class="glare"><img src="https://glitta.rocks/wp-content/uploads/2026/08/nu-breed-2026-08-23.jpg" alt="Nu Breed, August 2026" loading="lazy" decoding="async" /></li>
+    </ul>
+
+    <p class="note reveal">
+      Add photos via the media library - and only pictures whose rights are
+      cleared. The curtain principle applies here too.
+    </p>
+  </section>
+
+  <!-- ========== BOOKING ========== -->
+  <section class="section booking" id="contact">
+    <div class="fluid-bed" aria-hidden="true"></div>
+    <div class="head reveal">
+      <p class="kicker">Booking</p>
+      <h2 class="h2">Get Glitta on <em>the decks</em></h2>
+    </div>
+
+    <p class="booking-intro reveal">
+      Floor, date, vibe - tell me what you're planning and I'll bring the
+      sound. An inquiry costs nothing but a message.
+    </p>
+
+    <div class="cta-row reveal">
+      <span class="magnet" data-magnet>
+        <span class="magnet-inner">
+          <span class="star-border" style="--star-speed:6s">
+            <span class="star-bottom" aria-hidden="true"></span>
+            <span class="star-top" aria-hidden="true"></span>
+            <a class="btn" href="mailto:booking@glitta.rocks">Mail Glitta</a>
+          </span>
+        </span>
+      </span>
+      <span class="magnet" data-magnet>
+        <span class="magnet-inner">
+          <span class="star-border" style="--star-speed:8s;--star-color:var(--uvy)">
+            <span class="star-bottom" aria-hidden="true"></span>
+            <span class="star-top" aria-hidden="true"></span>
+            <a class="btn btn-ghost" href="https://soundcloud.com/glittawicca" rel="me noopener" target="_blank">SoundCloud</a>
+          </span>
+        </span>
+      </span>
+    </div>
+
+    <p class="note reveal">
+      Booking mail goes to booking@glitta.rocks. A form module can live here
+      later - fields in this section wear the night look automatically.
+    </p>
+  </section>
+
+  <!-- ========== FINALE ========== -->
+  <section class="finale">
+    <div class="finale-inner">
+      <p class="finale-kicker">Until morning</p>
+      <h2 class="finale-title"><span class="split">See you at sunrise</span></h2>
+      <p class="finale-sub">
+        The night doesn't end - it only gets brighter.
+        Thank you for scrolling all the way down.
+      </p>
+      <p class="finale-links">
+        <a href="https://soundcloud.com/glittawicca" rel="me noopener" target="_blank">SoundCloud</a>
+        <a href="https://soundcloud.com/titisondecks" rel="noopener" target="_blank">TiTis on Decks</a>
+        <a href="#contact">Booking</a>
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="river">
+  <div class="river-inner">
+    <p>&copy; GLITTAVERSE 2026</p>
+    <p>
+      <span class="magnet" data-magnet data-magnet-strength="3"><span class="magnet-inner"><a href="#">Facebook</a></span></span>
+      &nbsp;&middot;&nbsp;
+      <span class="magnet" data-magnet data-magnet-strength="3"><span class="magnet-inner"><a href="#">Instagram</a></span></span>
+      &nbsp;&middot;&nbsp;
+      <span class="magnet" data-magnet data-magnet-strength="3"><span class="magnet-inner"><a href="mailto:booking@glitta.rocks">Booking</a></span></span>
+    </p>
+  </div>
+</footer>
+</div><!-- /.g4-page -->
+
+<script>
+/* ============================================================
+   The components. React Bits pieces first, ported to plain
+   functions; the theme's own effects after. Nothing here needs
+   a build step, a bundler or a single third-party request.
+   ============================================================ */
+(function () {
+  'use strict';
+
+  const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* SplashCursor is named for a cursor, and a touch device has none:
+     a finger drag is already a scroll, so the splat fights the gesture
+     instead of following it. Magnet has the same problem - buttons
+     drift as you swipe past them. Those three are also the only
+     expensive things here; everything else is CSS and runs anywhere. */
+  const HAS_CURSOR = matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  const ready = fn => {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn);
+    else fn();
+  };
+
+  /* ══════════════════════════════════════════════════════════
+     React Bits · SplashCursor
+     reactbits.dev/r/SplashCursor-JS-CSS.json — WebGL fluid, no deps.
+
+     The React shell was four lines around a thousand: the props
+     became the destructuring defaults below, the useEffect body
+     became this function, canvasRef.current became the argument,
+     animationFrameId.current became rafId, and the effect's
+     cleanup return became the destroy() this hands back. The
+     simulation in between is the library's, untouched.
+     ══════════════════════════════════════════════════════════ */
+function initSplashCursor(canvas, options) {
+  const {
+    SIM_RESOLUTION = 128,
+    DYE_RESOLUTION = 1440,
+    CAPTURE_RESOLUTION = 512,
+    DENSITY_DISSIPATION = 3.5,
+    VELOCITY_DISSIPATION = 2,
+    PRESSURE = 0.1,
+    PRESSURE_ITERATIONS = 20,
+    CURL = 3,
+    SPLAT_RADIUS = 0.2,
+    SPLAT_FORCE = 6000,
+    SHADING = true,
+    COLOR_UPDATE_SPEED = 10,
+    BACK_COLOR = { r: 0.5, g: 0, b: 0 },
+    TRANSPARENT = true,
+    RAINBOW_MODE = true,
+    COLOR = '#ff0000',
+    /* ADDED to the vendored component, and the only addition: with no
+       pointer there is nothing to splash, so a canvas on a phone would
+       just sit black. Milliseconds between self-splats; 0 keeps the
+       library's original behaviour exactly. */
+    AUTO_SPLAT_MS = 0,
+  } = options || {};
+
+  let rafId = null;
+  let autoTimer = null;
+  let paused = false;
+
+  // Track if the effect is still active for cleanup
+  let isActive = true;
+
+  function pointerPrototype() {
+    this.id = -1;
+    this.texcoordX = 0;
+    this.texcoordY = 0;
+    this.prevTexcoordX = 0;
+    this.prevTexcoordY = 0;
+    this.deltaX = 0;
+    this.deltaY = 0;
+    this.down = false;
+    this.moved = false;
+    this.color = [0, 0, 0];
+  }
+
+  let config = {
+    SIM_RESOLUTION,
+    DYE_RESOLUTION,
+    CAPTURE_RESOLUTION,
+    DENSITY_DISSIPATION,
+    VELOCITY_DISSIPATION,
+    PRESSURE,
+    PRESSURE_ITERATIONS,
+    CURL,
+    SPLAT_RADIUS,
+    SPLAT_FORCE,
+    SHADING,
+    COLOR_UPDATE_SPEED,
+    PAUSED: false,
+    BACK_COLOR,
+    TRANSPARENT,
+    RAINBOW_MODE,
+    COLOR
+  };
+
+  let pointers = [new pointerPrototype()];
+
+  const { gl, ext } = getWebGLContext(canvas);
+  if (!ext.supportLinearFiltering) {
+    config.DYE_RESOLUTION = 256;
+    config.SHADING = false;
+  }
+
+  function getWebGLContext(canvas) {
+    const params = {
+      alpha: true,
+      depth: false,
+      stencil: false,
+      antialias: false,
+      preserveDrawingBuffer: false
+    };
+    let gl = canvas.getContext('webgl2', params);
+    const isWebGL2 = !!gl;
+    if (!isWebGL2) gl = canvas.getContext('webgl', params) || canvas.getContext('experimental-webgl', params);
+
+    let halfFloat;
+    let supportLinearFiltering;
+    if (isWebGL2) {
+      gl.getExtension('EXT_color_buffer_float');
+      supportLinearFiltering = gl.getExtension('OES_texture_float_linear');
+    } else {
+      halfFloat = gl.getExtension('OES_texture_half_float');
+      supportLinearFiltering = gl.getExtension('OES_texture_half_float_linear');
+    }
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+    const halfFloatTexType = isWebGL2 ? gl.HALF_FLOAT : halfFloat && halfFloat.HALF_FLOAT_OES;
+    let formatRGBA;
+    let formatRG;
+    let formatR;
+
+    if (isWebGL2) {
+      formatRGBA = getSupportedFormat(gl, gl.RGBA16F, gl.RGBA, halfFloatTexType);
+      formatRG = getSupportedFormat(gl, gl.RG16F, gl.RG, halfFloatTexType);
+      formatR = getSupportedFormat(gl, gl.R16F, gl.RED, halfFloatTexType);
+    } else {
+      formatRGBA = getSupportedFormat(gl, gl.RGBA, gl.RGBA, halfFloatTexType);
+      formatRG = getSupportedFormat(gl, gl.RGBA, gl.RGBA, halfFloatTexType);
+      formatR = getSupportedFormat(gl, gl.RGBA, gl.RGBA, halfFloatTexType);
+    }
+
+    return {
+      gl,
+      ext: {
+        formatRGBA,
+        formatRG,
+        formatR,
+        halfFloatTexType,
+        supportLinearFiltering
+      }
+    };
+  }
+
+  function getSupportedFormat(gl, internalFormat, format, type) {
+    if (!supportRenderTextureFormat(gl, internalFormat, format, type)) {
+      switch (internalFormat) {
+        case gl.R16F:
+          return getSupportedFormat(gl, gl.RG16F, gl.RG, type);
+        case gl.RG16F:
+          return getSupportedFormat(gl, gl.RGBA16F, gl.RGBA, type);
+        default:
+          return null;
+      }
+    }
+    return { internalFormat, format };
+  }
+
+  function supportRenderTextureFormat(gl, internalFormat, format, type) {
+    const texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, 4, 4, 0, format, type, null);
+    const fbo = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+    const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+    return status === gl.FRAMEBUFFER_COMPLETE;
+  }
+
+  class Material {
+    constructor(vertexShader, fragmentShaderSource) {
+      this.vertexShader = vertexShader;
+      this.fragmentShaderSource = fragmentShaderSource;
+      this.programs = [];
+      this.activeProgram = null;
+      this.uniforms = [];
+    }
+    setKeywords(keywords) {
+      let hash = 0;
+      for (let i = 0; i < keywords.length; i++) hash += hashCode(keywords[i]);
+      let program = this.programs[hash];
+      if (program == null) {
+        let fragmentShader = compileShader(gl.FRAGMENT_SHADER, this.fragmentShaderSource, keywords);
+        program = createProgram(this.vertexShader, fragmentShader);
+        this.programs[hash] = program;
+      }
+      if (program === this.activeProgram) return;
+      this.uniforms = getUniforms(program);
+      this.activeProgram = program;
+    }
+    bind() {
+      gl.useProgram(this.activeProgram);
+    }
+  }
+
+  class Program {
+    constructor(vertexShader, fragmentShader) {
+      this.uniforms = {};
+      this.program = createProgram(vertexShader, fragmentShader);
+      this.uniforms = getUniforms(this.program);
+    }
+    bind() {
+      gl.useProgram(this.program);
+    }
+  }
+
+  function createProgram(vertexShader, fragmentShader) {
+    let program = gl.createProgram();
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) console.trace(gl.getProgramInfoLog(program));
+    return program;
+  }
+
+  function getUniforms(program) {
+    let uniforms = [];
+    let uniformCount = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+    for (let i = 0; i < uniformCount; i++) {
+      let uniformName = gl.getActiveUniform(program, i).name;
+      uniforms[uniformName] = gl.getUniformLocation(program, uniformName);
+    }
+    return uniforms;
+  }
+
+  function compileShader(type, source, keywords) {
+    source = addKeywords(source, keywords);
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) console.trace(gl.getShaderInfoLog(shader));
+    return shader;
+  }
+
+  function addKeywords(source, keywords) {
+    if (!keywords) return source;
+    let keywordsString = '';
+    keywords.forEach(keyword => {
+      keywordsString += '#define ' + keyword + '\n';
+    });
+    return keywordsString + source;
+  }
+
+  const baseVertexShader = compileShader(
+    gl.VERTEX_SHADER,
+    `
+      precision highp float;
+      attribute vec2 aPosition;
+      varying vec2 vUv;
+      varying vec2 vL;
+      varying vec2 vR;
+      varying vec2 vT;
+      varying vec2 vB;
+      uniform vec2 texelSize;
+
+      void main () {
+          vUv = aPosition * 0.5 + 0.5;
+          vL = vUv - vec2(texelSize.x, 0.0);
+          vR = vUv + vec2(texelSize.x, 0.0);
+          vT = vUv + vec2(0.0, texelSize.y);
+          vB = vUv - vec2(0.0, texelSize.y);
+          gl_Position = vec4(aPosition, 0.0, 1.0);
+      }
+    `
+  );
+
+  const copyShader = compileShader(
+    gl.FRAGMENT_SHADER,
+    `
+      precision mediump float;
+      precision mediump sampler2D;
+      varying highp vec2 vUv;
+      uniform sampler2D uTexture;
+
+      void main () {
+          gl_FragColor = texture2D(uTexture, vUv);
+      }
+    `
+  );
+
+  const clearShader = compileShader(
+    gl.FRAGMENT_SHADER,
+    `
+      precision mediump float;
+      precision mediump sampler2D;
+      varying highp vec2 vUv;
+      uniform sampler2D uTexture;
+      uniform float value;
+
+      void main () {
+          gl_FragColor = value * texture2D(uTexture, vUv);
+      }
+    `
+  );
+
+  const displayShaderSource = `
+    precision highp float;
+    precision highp sampler2D;
+    varying vec2 vUv;
+    varying vec2 vL;
+    varying vec2 vR;
+    varying vec2 vT;
+    varying vec2 vB;
+    uniform sampler2D uTexture;
+    uniform sampler2D uDithering;
+    uniform vec2 ditherScale;
+    uniform vec2 texelSize;
+
+    vec3 linearToGamma (vec3 color) {
+        color = max(color, vec3(0));
+        return max(1.055 * pow(color, vec3(0.416666667)) - 0.055, vec3(0));
+    }
+
+    void main () {
+        vec3 c = texture2D(uTexture, vUv).rgb;
+        #ifdef SHADING
+            vec3 lc = texture2D(uTexture, vL).rgb;
+            vec3 rc = texture2D(uTexture, vR).rgb;
+            vec3 tc = texture2D(uTexture, vT).rgb;
+            vec3 bc = texture2D(uTexture, vB).rgb;
+
+            float dx = length(rc) - length(lc);
+            float dy = length(tc) - length(bc);
+
+            vec3 n = normalize(vec3(dx, dy, length(texelSize)));
+            vec3 l = vec3(0.0, 0.0, 1.0);
+
+            float diffuse = clamp(dot(n, l) + 0.7, 0.7, 1.0);
+            c *= diffuse;
+        #endif
+
+        float a = max(c.r, max(c.g, c.b));
+        gl_FragColor = vec4(c, a);
+    }
+  `;
+
+  const splatShader = compileShader(
+    gl.FRAGMENT_SHADER,
+    `
+      precision highp float;
+      precision highp sampler2D;
+      varying vec2 vUv;
+      uniform sampler2D uTarget;
+      uniform float aspectRatio;
+      uniform vec3 color;
+      uniform vec2 point;
+      uniform float radius;
+
+      void main () {
+          vec2 p = vUv - point.xy;
+          p.x *= aspectRatio;
+          vec3 splat = exp(-dot(p, p) / radius) * color;
+          vec3 base = texture2D(uTarget, vUv).xyz;
+          gl_FragColor = vec4(base + splat, 1.0);
+      }
+    `
+  );
+
+  const advectionShader = compileShader(
+    gl.FRAGMENT_SHADER,
+    `
+      precision highp float;
+      precision highp sampler2D;
+      varying vec2 vUv;
+      uniform sampler2D uVelocity;
+      uniform sampler2D uSource;
+      uniform vec2 texelSize;
+      uniform vec2 dyeTexelSize;
+      uniform float dt;
+      uniform float dissipation;
+
+      vec4 bilerp (sampler2D sam, vec2 uv, vec2 tsize) {
+          vec2 st = uv / tsize - 0.5;
+          vec2 iuv = floor(st);
+          vec2 fuv = fract(st);
+
+          vec4 a = texture2D(sam, (iuv + vec2(0.5, 0.5)) * tsize);
+          vec4 b = texture2D(sam, (iuv + vec2(1.5, 0.5)) * tsize);
+          vec4 c = texture2D(sam, (iuv + vec2(0.5, 1.5)) * tsize);
+          vec4 d = texture2D(sam, (iuv + vec2(1.5, 1.5)) * tsize);
+
+          return mix(mix(a, b, fuv.x), mix(c, d, fuv.x), fuv.y);
+      }
+
+      void main () {
+          #ifdef MANUAL_FILTERING
+              vec2 coord = vUv - dt * bilerp(uVelocity, vUv, texelSize).xy * texelSize;
+              vec4 result = bilerp(uSource, coord, dyeTexelSize);
+          #else
+              vec2 coord = vUv - dt * texture2D(uVelocity, vUv).xy * texelSize;
+              vec4 result = texture2D(uSource, coord);
+          #endif
+          float decay = 1.0 + dissipation * dt;
+          gl_FragColor = result / decay;
+      }
+    `,
+    ext.supportLinearFiltering ? null : ['MANUAL_FILTERING']
+  );
+
+  const divergenceShader = compileShader(
+    gl.FRAGMENT_SHADER,
+    `
+      precision mediump float;
+      precision mediump sampler2D;
+      varying highp vec2 vUv;
+      varying highp vec2 vL;
+      varying highp vec2 vR;
+      varying highp vec2 vT;
+      varying highp vec2 vB;
+      uniform sampler2D uVelocity;
+
+      void main () {
+          float L = texture2D(uVelocity, vL).x;
+          float R = texture2D(uVelocity, vR).x;
+          float T = texture2D(uVelocity, vT).y;
+          float B = texture2D(uVelocity, vB).y;
+
+          vec2 C = texture2D(uVelocity, vUv).xy;
+          if (vL.x < 0.0) { L = -C.x; }
+          if (vR.x > 1.0) { R = -C.x; }
+          if (vT.y > 1.0) { T = -C.y; }
+          if (vB.y < 0.0) { B = -C.y; }
+
+          float div = 0.5 * (R - L + T - B);
+          gl_FragColor = vec4(div, 0.0, 0.0, 1.0);
+      }
+    `
+  );
+
+  const curlShader = compileShader(
+    gl.FRAGMENT_SHADER,
+    `
+      precision mediump float;
+      precision mediump sampler2D;
+      varying highp vec2 vUv;
+      varying highp vec2 vL;
+      varying highp vec2 vR;
+      varying highp vec2 vT;
+      varying highp vec2 vB;
+      uniform sampler2D uVelocity;
+
+      void main () {
+          float L = texture2D(uVelocity, vL).y;
+          float R = texture2D(uVelocity, vR).y;
+          float T = texture2D(uVelocity, vT).x;
+          float B = texture2D(uVelocity, vB).x;
+          float vorticity = R - L - T + B;
+          gl_FragColor = vec4(0.5 * vorticity, 0.0, 0.0, 1.0);
+      }
+    `
+  );
+
+  const vorticityShader = compileShader(
+    gl.FRAGMENT_SHADER,
+    `
+      precision highp float;
+      precision highp sampler2D;
+      varying vec2 vUv;
+      varying vec2 vL;
+      varying vec2 vR;
+      varying vec2 vT;
+      varying vec2 vB;
+      uniform sampler2D uVelocity;
+      uniform sampler2D uCurl;
+      uniform float curl;
+      uniform float dt;
+
+      void main () {
+          float L = texture2D(uCurl, vL).x;
+          float R = texture2D(uCurl, vR).x;
+          float T = texture2D(uCurl, vT).x;
+          float B = texture2D(uCurl, vB).x;
+          float C = texture2D(uCurl, vUv).x;
+
+          vec2 force = 0.5 * vec2(abs(T) - abs(B), abs(R) - abs(L));
+          force /= length(force) + 0.0001;
+          force *= curl * C;
+          force.y *= -1.0;
+
+          vec2 velocity = texture2D(uVelocity, vUv).xy;
+          velocity += force * dt;
+          velocity = min(max(velocity, -1000.0), 1000.0);
+          gl_FragColor = vec4(velocity, 0.0, 1.0);
+      }
+    `
+  );
+
+  const pressureShader = compileShader(
+    gl.FRAGMENT_SHADER,
+    `
+      precision mediump float;
+      precision mediump sampler2D;
+      varying highp vec2 vUv;
+      varying highp vec2 vL;
+      varying highp vec2 vR;
+      varying highp vec2 vT;
+      varying highp vec2 vB;
+      uniform sampler2D uPressure;
+      uniform sampler2D uDivergence;
+
+      void main () {
+          float L = texture2D(uPressure, vL).x;
+          float R = texture2D(uPressure, vR).x;
+          float T = texture2D(uPressure, vT).x;
+          float B = texture2D(uPressure, vB).x;
+          float C = texture2D(uPressure, vUv).x;
+          float divergence = texture2D(uDivergence, vUv).x;
+          float pressure = (L + R + B + T - divergence) * 0.25;
+          gl_FragColor = vec4(pressure, 0.0, 0.0, 1.0);
+      }
+    `
+  );
+
+  const gradientSubtractShader = compileShader(
+    gl.FRAGMENT_SHADER,
+    `
+      precision mediump float;
+      precision mediump sampler2D;
+      varying highp vec2 vUv;
+      varying highp vec2 vL;
+      varying highp vec2 vR;
+      varying highp vec2 vT;
+      varying highp vec2 vB;
+      uniform sampler2D uPressure;
+      uniform sampler2D uVelocity;
+
+      void main () {
+          float L = texture2D(uPressure, vL).x;
+          float R = texture2D(uPressure, vR).x;
+          float T = texture2D(uPressure, vT).x;
+          float B = texture2D(uPressure, vB).x;
+          vec2 velocity = texture2D(uVelocity, vUv).xy;
+          velocity.xy -= vec2(R - L, T - B);
+          gl_FragColor = vec4(velocity, 0.0, 1.0);
+      }
+    `
+  );
+
+  const blit = (() => {
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, -1, 1, 1, 1, 1, -1]), gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([0, 1, 2, 0, 2, 3]), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(0);
+    return (target, clear = false) => {
+      if (target == null) {
+        gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      } else {
+        gl.viewport(0, 0, target.width, target.height);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, target.fbo);
+      }
+      if (clear) {
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+      }
+      gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+    };
+  })();
+
+  let dye, velocity, divergence, curl, pressure;
+
+  const copyProgram = new Program(baseVertexShader, copyShader);
+  const clearProgram = new Program(baseVertexShader, clearShader);
+  const splatProgram = new Program(baseVertexShader, splatShader);
+  const advectionProgram = new Program(baseVertexShader, advectionShader);
+  const divergenceProgram = new Program(baseVertexShader, divergenceShader);
+  const curlProgram = new Program(baseVertexShader, curlShader);
+  const vorticityProgram = new Program(baseVertexShader, vorticityShader);
+  const pressureProgram = new Program(baseVertexShader, pressureShader);
+  const gradienSubtractProgram = new Program(baseVertexShader, gradientSubtractShader);
+  const displayMaterial = new Material(baseVertexShader, displayShaderSource);
+
+  function initFramebuffers() {
+    let simRes = getResolution(config.SIM_RESOLUTION);
+    let dyeRes = getResolution(config.DYE_RESOLUTION);
+    const texType = ext.halfFloatTexType;
+    const rgba = ext.formatRGBA;
+    const rg = ext.formatRG;
+    const r = ext.formatR;
+    const filtering = ext.supportLinearFiltering ? gl.LINEAR : gl.NEAREST;
+    gl.disable(gl.BLEND);
+
+    if (!dye)
+      dye = createDoubleFBO(dyeRes.width, dyeRes.height, rgba.internalFormat, rgba.format, texType, filtering);
+    else
+      dye = resizeDoubleFBO(dye, dyeRes.width, dyeRes.height, rgba.internalFormat, rgba.format, texType, filtering);
+
+    if (!velocity)
+      velocity = createDoubleFBO(simRes.width, simRes.height, rg.internalFormat, rg.format, texType, filtering);
+    else
+      velocity = resizeDoubleFBO(
+        velocity,
+        simRes.width,
+        simRes.height,
+        rg.internalFormat,
+        rg.format,
+        texType,
+        filtering
+      );
+
+    divergence = createFBO(simRes.width, simRes.height, r.internalFormat, r.format, texType, gl.NEAREST);
+    curl = createFBO(simRes.width, simRes.height, r.internalFormat, r.format, texType, gl.NEAREST);
+    pressure = createDoubleFBO(simRes.width, simRes.height, r.internalFormat, r.format, texType, gl.NEAREST);
+  }
+
+  function createFBO(w, h, internalFormat, format, type, param) {
+    gl.activeTexture(gl.TEXTURE0);
+    let texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, param);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, param);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, w, h, 0, format, type, null);
+
+    let fbo = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+    gl.viewport(0, 0, w, h);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    let texelSizeX = 1.0 / w;
+    let texelSizeY = 1.0 / h;
+    return {
+      texture,
+      fbo,
+      width: w,
+      height: h,
+      texelSizeX,
+      texelSizeY,
+      attach(id) {
+        gl.activeTexture(gl.TEXTURE0 + id);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        return id;
+      }
+    };
+  }
+
+  function createDoubleFBO(w, h, internalFormat, format, type, param) {
+    let fbo1 = createFBO(w, h, internalFormat, format, type, param);
+    let fbo2 = createFBO(w, h, internalFormat, format, type, param);
+    return {
+      width: w,
+      height: h,
+      texelSizeX: fbo1.texelSizeX,
+      texelSizeY: fbo1.texelSizeY,
+      get read() {
+        return fbo1;
+      },
+      set read(value) {
+        fbo1 = value;
+      },
+      get write() {
+        return fbo2;
+      },
+      set write(value) {
+        fbo2 = value;
+      },
+      swap() {
+        let temp = fbo1;
+        fbo1 = fbo2;
+        fbo2 = temp;
+      }
+    };
+  }
+
+  function resizeFBO(target, w, h, internalFormat, format, type, param) {
+    let newFBO = createFBO(w, h, internalFormat, format, type, param);
+    copyProgram.bind();
+    gl.uniform1i(copyProgram.uniforms.uTexture, target.attach(0));
+    blit(newFBO);
+    return newFBO;
+  }
+
+  function resizeDoubleFBO(target, w, h, internalFormat, format, type, param) {
+    if (target.width === w && target.height === h) return target;
+    target.read = resizeFBO(target.read, w, h, internalFormat, format, type, param);
+    target.write = createFBO(w, h, internalFormat, format, type, param);
+    target.width = w;
+    target.height = h;
+    target.texelSizeX = 1.0 / w;
+    target.texelSizeY = 1.0 / h;
+    return target;
+  }
+
+  function updateKeywords() {
+    let displayKeywords = [];
+    if (config.SHADING) displayKeywords.push('SHADING');
+    displayMaterial.setKeywords(displayKeywords);
+  }
+
+  updateKeywords();
+  initFramebuffers();
+  let lastUpdateTime = Date.now();
+  let colorUpdateTimer = 0.0;
+
+  function updateFrame() {
+    if (!isActive) return;
+    const dt = calcDeltaTime();
+    if (resizeCanvas()) initFramebuffers();
+    updateColors(dt);
+    applyInputs();
+    step(dt);
+    render(null);
+    rafId = requestAnimationFrame(updateFrame);
+  }
+
+  function calcDeltaTime() {
+    let now = Date.now();
+    let dt = (now - lastUpdateTime) / 1000;
+    dt = Math.min(dt, 0.016666);
+    lastUpdateTime = now;
+    return dt;
+  }
+
+  function resizeCanvas() {
+    let width = scaleByPixelRatio(canvas.clientWidth);
+    let height = scaleByPixelRatio(canvas.clientHeight);
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width;
+      canvas.height = height;
+      return true;
+    }
+    return false;
+  }
+
+  function updateColors(dt) {
+    colorUpdateTimer += dt * config.COLOR_UPDATE_SPEED;
+    if (colorUpdateTimer >= 1) {
+      colorUpdateTimer = wrap(colorUpdateTimer, 0, 1);
+      pointers.forEach(p => {
+        p.color = generateColor();
+      });
+    }
+  }
+
+  function applyInputs() {
+    pointers.forEach(p => {
+      if (p.moved) {
+        p.moved = false;
+        splatPointer(p);
+      }
+    });
+  }
+
+  function step(dt) {
+    gl.disable(gl.BLEND);
+    curlProgram.bind();
+    gl.uniform2f(curlProgram.uniforms.texelSize, velocity.texelSizeX, velocity.texelSizeY);
+    gl.uniform1i(curlProgram.uniforms.uVelocity, velocity.read.attach(0));
+    blit(curl);
+
+    vorticityProgram.bind();
+    gl.uniform2f(vorticityProgram.uniforms.texelSize, velocity.texelSizeX, velocity.texelSizeY);
+    gl.uniform1i(vorticityProgram.uniforms.uVelocity, velocity.read.attach(0));
+    gl.uniform1i(vorticityProgram.uniforms.uCurl, curl.attach(1));
+    gl.uniform1f(vorticityProgram.uniforms.curl, config.CURL);
+    gl.uniform1f(vorticityProgram.uniforms.dt, dt);
+    blit(velocity.write);
+    velocity.swap();
+
+    divergenceProgram.bind();
+    gl.uniform2f(divergenceProgram.uniforms.texelSize, velocity.texelSizeX, velocity.texelSizeY);
+    gl.uniform1i(divergenceProgram.uniforms.uVelocity, velocity.read.attach(0));
+    blit(divergence);
+
+    clearProgram.bind();
+    gl.uniform1i(clearProgram.uniforms.uTexture, pressure.read.attach(0));
+    gl.uniform1f(clearProgram.uniforms.value, config.PRESSURE);
+    blit(pressure.write);
+    pressure.swap();
+
+    pressureProgram.bind();
+    gl.uniform2f(pressureProgram.uniforms.texelSize, velocity.texelSizeX, velocity.texelSizeY);
+    gl.uniform1i(pressureProgram.uniforms.uDivergence, divergence.attach(0));
+    for (let i = 0; i < config.PRESSURE_ITERATIONS; i++) {
+      gl.uniform1i(pressureProgram.uniforms.uPressure, pressure.read.attach(1));
+      blit(pressure.write);
+      pressure.swap();
+    }
+
+    gradienSubtractProgram.bind();
+    gl.uniform2f(gradienSubtractProgram.uniforms.texelSize, velocity.texelSizeX, velocity.texelSizeY);
+    gl.uniform1i(gradienSubtractProgram.uniforms.uPressure, pressure.read.attach(0));
+    gl.uniform1i(gradienSubtractProgram.uniforms.uVelocity, velocity.read.attach(1));
+    blit(velocity.write);
+    velocity.swap();
+
+    advectionProgram.bind();
+    gl.uniform2f(advectionProgram.uniforms.texelSize, velocity.texelSizeX, velocity.texelSizeY);
+    if (!ext.supportLinearFiltering)
+      gl.uniform2f(advectionProgram.uniforms.dyeTexelSize, velocity.texelSizeX, velocity.texelSizeY);
+    let velocityId = velocity.read.attach(0);
+    gl.uniform1i(advectionProgram.uniforms.uVelocity, velocityId);
+    gl.uniform1i(advectionProgram.uniforms.uSource, velocityId);
+    gl.uniform1f(advectionProgram.uniforms.dt, dt);
+    gl.uniform1f(advectionProgram.uniforms.dissipation, config.VELOCITY_DISSIPATION);
+    blit(velocity.write);
+    velocity.swap();
+
+    if (!ext.supportLinearFiltering)
+      gl.uniform2f(advectionProgram.uniforms.dyeTexelSize, dye.texelSizeX, dye.texelSizeY);
+    gl.uniform1i(advectionProgram.uniforms.uVelocity, velocity.read.attach(0));
+    gl.uniform1i(advectionProgram.uniforms.uSource, dye.read.attach(1));
+    gl.uniform1f(advectionProgram.uniforms.dissipation, config.DENSITY_DISSIPATION);
+    blit(dye.write);
+    dye.swap();
+  }
+
+  function render(target) {
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    gl.enable(gl.BLEND);
+    drawDisplay(target);
+  }
+
+  function drawDisplay(target) {
+    let width = target == null ? gl.drawingBufferWidth : target.width;
+    let height = target == null ? gl.drawingBufferHeight : target.height;
+    displayMaterial.bind();
+    if (config.SHADING) gl.uniform2f(displayMaterial.uniforms.texelSize, 1.0 / width, 1.0 / height);
+    gl.uniform1i(displayMaterial.uniforms.uTexture, dye.read.attach(0));
+    blit(target);
+  }
+
+  function splatPointer(pointer) {
+    let dx = pointer.deltaX * config.SPLAT_FORCE;
+    let dy = pointer.deltaY * config.SPLAT_FORCE;
+    splat(pointer.texcoordX, pointer.texcoordY, dx, dy, pointer.color);
+  }
+
+  function clickSplat(pointer) {
+    const color = generateColor();
+    color.r *= 10.0;
+    color.g *= 10.0;
+    color.b *= 10.0;
+    let dx = 10 * (Math.random() - 0.5);
+    let dy = 30 * (Math.random() - 0.5);
+    splat(pointer.texcoordX, pointer.texcoordY, dx, dy, color);
+  }
+
+  function splat(x, y, dx, dy, color) {
+    splatProgram.bind();
+    gl.uniform1i(splatProgram.uniforms.uTarget, velocity.read.attach(0));
+    gl.uniform1f(splatProgram.uniforms.aspectRatio, canvas.width / canvas.height);
+    gl.uniform2f(splatProgram.uniforms.point, x, y);
+    gl.uniform3f(splatProgram.uniforms.color, dx, dy, 0.0);
+    gl.uniform1f(splatProgram.uniforms.radius, correctRadius(config.SPLAT_RADIUS / 100.0));
+    blit(velocity.write);
+    velocity.swap();
+
+    gl.uniform1i(splatProgram.uniforms.uTarget, dye.read.attach(0));
+    gl.uniform3f(splatProgram.uniforms.color, color.r, color.g, color.b);
+    blit(dye.write);
+    dye.swap();
+  }
+
+  function correctRadius(radius) {
+    let aspectRatio = canvas.width / canvas.height;
+    if (aspectRatio > 1) radius *= aspectRatio;
+    return radius;
+  }
+
+  function updatePointerDownData(pointer, id, posX, posY) {
+    pointer.id = id;
+    pointer.down = true;
+    pointer.moved = false;
+    pointer.texcoordX = posX / canvas.width;
+    pointer.texcoordY = 1.0 - posY / canvas.height;
+    pointer.prevTexcoordX = pointer.texcoordX;
+    pointer.prevTexcoordY = pointer.texcoordY;
+    pointer.deltaX = 0;
+    pointer.deltaY = 0;
+    pointer.color = generateColor();
+  }
+
+  function updatePointerMoveData(pointer, posX, posY, color) {
+    pointer.prevTexcoordX = pointer.texcoordX;
+    pointer.prevTexcoordY = pointer.texcoordY;
+    pointer.texcoordX = posX / canvas.width;
+    pointer.texcoordY = 1.0 - posY / canvas.height;
+    pointer.deltaX = correctDeltaX(pointer.texcoordX - pointer.prevTexcoordX);
+    pointer.deltaY = correctDeltaY(pointer.texcoordY - pointer.prevTexcoordY);
+    pointer.moved = Math.abs(pointer.deltaX) > 0 || Math.abs(pointer.deltaY) > 0;
+    pointer.color = color;
+  }
+
+  function updatePointerUpData(pointer) {
+    pointer.down = false;
+  }
+
+  function correctDeltaX(delta) {
+    let aspectRatio = canvas.width / canvas.height;
+    if (aspectRatio < 1) delta *= aspectRatio;
+    return delta;
+  }
+
+  function correctDeltaY(delta) {
+    let aspectRatio = canvas.width / canvas.height;
+    if (aspectRatio > 1) delta /= aspectRatio;
+    return delta;
+  }
+
+  function hexToRGB(hex) {
+    let val = hex.replace('#', '');
+    if (val.length === 3) val = val[0] + val[0] + val[1] + val[1] + val[2] + val[2];
+    const r = parseInt(val.slice(0, 2), 16) / 255;
+    const g = parseInt(val.slice(2, 4), 16) / 255;
+    const b = parseInt(val.slice(4, 6), 16) / 255;
+    return { r: r * 0.15, g: g * 0.15, b: b * 0.15 };
+  }
+
+  function generateColor() {
+    if (!config.RAINBOW_MODE) {
+      return hexToRGB(config.COLOR);
+    }
+    let c = HSVtoRGB(Math.random(), 1.0, 1.0);
+    c.r *= 0.15;
+    c.g *= 0.15;
+    c.b *= 0.15;
+    return c;
+  }
+
+  function HSVtoRGB(h, s, v) {
+    let r, g, b, i, f, p, q, t;
+    i = Math.floor(h * 6);
+    f = h * 6 - i;
+    p = v * (1 - s);
+    q = v * (1 - f * s);
+    t = v * (1 - (1 - f) * s);
+    switch (i % 6) {
+      case 0:
+        r = v;
+        g = t;
+        b = p;
+        break;
+      case 1:
+        r = q;
+        g = v;
+        b = p;
+        break;
+      case 2:
+        r = p;
+        g = v;
+        b = t;
+        break;
+      case 3:
+        r = p;
+        g = q;
+        b = v;
+        break;
+      case 4:
+        r = t;
+        g = p;
+        b = v;
+        break;
+      case 5:
+        r = v;
+        g = p;
+        b = q;
+        break;
+      default:
+        break;
+    }
+    return { r, g, b };
+  }
+
+  function wrap(value, min, max) {
+    const range = max - min;
+    if (range === 0) return min;
+    return ((value - min) % range) + min;
+  }
+
+  function getResolution(resolution) {
+    let aspectRatio = gl.drawingBufferWidth / gl.drawingBufferHeight;
+    if (aspectRatio < 1) aspectRatio = 1.0 / aspectRatio;
+    const min = Math.round(resolution);
+    const max = Math.round(resolution * aspectRatio);
+    if (gl.drawingBufferWidth > gl.drawingBufferHeight) return { width: max, height: min };
+    else return { width: min, height: max };
+  }
+
+  function scaleByPixelRatio(input) {
+    const pixelRatio = window.devicePixelRatio || 1;
+    return Math.floor(input * pixelRatio);
+  }
+
+  function hashCode(s) {
+    if (s.length === 0) return 0;
+    let hash = 0;
+    for (let i = 0; i < s.length; i++) {
+      hash = (hash << 5) - hash + s.charCodeAt(i);
+      hash |= 0;
+    }
+    return hash;
+  }
+
+  // Named event handlers for proper cleanup
+  function handleMouseDown(e) {
+    let pointer = pointers[0];
+    let posX = scaleByPixelRatio(e.clientX);
+    let posY = scaleByPixelRatio(e.clientY);
+    updatePointerDownData(pointer, -1, posX, posY);
+    clickSplat(pointer);
+  }
+
+  let firstMouseMoveHandled = false;
+  function handleMouseMove(e) {
+    let pointer = pointers[0];
+    let posX = scaleByPixelRatio(e.clientX);
+    let posY = scaleByPixelRatio(e.clientY);
+    if (!firstMouseMoveHandled) {
+      let color = generateColor();
+      updatePointerMoveData(pointer, posX, posY, color);
+      firstMouseMoveHandled = true;
+    } else {
+      updatePointerMoveData(pointer, posX, posY, pointer.color);
+    }
+  }
+
+  function handleTouchStart(e) {
+    const touches = e.targetTouches;
+    let pointer = pointers[0];
+    for (let i = 0; i < touches.length; i++) {
+      let posX = scaleByPixelRatio(touches[i].clientX);
+      let posY = scaleByPixelRatio(touches[i].clientY);
+      updatePointerDownData(pointer, touches[i].identifier, posX, posY);
+    }
+  }
+
+  function handleTouchMove(e) {
+    const touches = e.targetTouches;
+    let pointer = pointers[0];
+    for (let i = 0; i < touches.length; i++) {
+      let posX = scaleByPixelRatio(touches[i].clientX);
+      let posY = scaleByPixelRatio(touches[i].clientY);
+      updatePointerMoveData(pointer, posX, posY, pointer.color);
+    }
+  }
+
+  function handleTouchEnd(e) {
+    const touches = e.changedTouches;
+    let pointer = pointers[0];
+    for (let i = 0; i < touches.length; i++) {
+      updatePointerUpData(pointer);
+    }
+  }
+
+  // Add event listeners
+  window.addEventListener('mousedown', handleMouseDown);
+  window.addEventListener('mousemove', handleMouseMove);
+  window.addEventListener('touchstart', handleTouchStart);
+  window.addEventListener('touchmove', handleTouchMove, false);
+  window.addEventListener('touchend', handleTouchEnd);
+
+  updateFrame();
+
+  /* the auto-splat driver - same call the pointer makes, same colours */
+  function autoSplat() {
+    if (!isActive || paused) return;
+    const color = generateColor();
+    color.r *= 10.0; color.g *= 10.0; color.b *= 10.0;
+    splat(Math.random(), Math.random(),
+          1000 * (Math.random() - 0.5),
+          1000 * (Math.random() - 0.5),
+          color);
+    autoTimer = setTimeout(autoSplat, AUTO_SPLAT_MS * (0.6 + Math.random() * 0.9));
+  }
+
+  function scheduleAutoSplat() {
+    if (AUTO_SPLAT_MS > 0 && !autoTimer) {
+      autoTimer = setTimeout(autoSplat, AUTO_SPLAT_MS);
+    }
+  }
+
+  scheduleAutoSplat();
+
+  return {
+    /* A simulation nobody can see still costs a full frame of GPU and
+       a rAF every 16ms. pause() stops scheduling entirely rather than
+       skipping work inside the loop - an idle sim should cost what no
+       sim costs. */
+    pause: function () {
+      if (paused) return;
+      paused = true;
+      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+      if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+    },
+    resume: function () {
+      if (!paused || !isActive) return;
+      paused = false;
+      lastUpdateTime = Date.now();   /* or the first dt is the whole gap */
+      rafId = requestAnimationFrame(updateFrame);
+      scheduleAutoSplat();
+    },
+    destroy: function () {
+      isActive = false;
+      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+      if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+      window.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+    }
+  };
+}
+
+  /* ══════════════════════════════════════════════════════════
+     React Bits · Noise
+     reactbits.dev/r/Noise-JS-CSS.json — grain, no deps.
+     Unchanged but for the wrapper; the canvas is fixed by CSS,
+     so the library's resize() only has the buffer left to set.
+     ══════════════════════════════════════════════════════════ */
+  function initNoise(canvas, { patternRefreshInterval = 2, patternAlpha = 12 } = {}) {
+    const ctx = canvas.getContext('2d', { alpha: true });
+    if (!ctx) return () => {};
+
+    const SIZE = 1024;
+    let frame = 0;
+    let rafId = null;
+
+    canvas.width = SIZE;
+    canvas.height = SIZE;
+
+    const drawGrain = () => {
+      const imageData = ctx.createImageData(SIZE, SIZE);
+      const { data } = imageData;
+      for (let i = 0; i < data.length; i += 4) {
+        const value = Math.random() * 255;
+        data[i] = value;
+        data[i + 1] = value;
+        data[i + 2] = value;
+        data[i + 3] = patternAlpha;
+      }
+      ctx.putImageData(imageData, 0, 0);
+    };
+
+    const loop = () => {
+      if (frame % patternRefreshInterval === 0) drawGrain();
+      frame++;
+      rafId = requestAnimationFrame(loop);
+    };
+
+    loop();
+
+    return () => {
+      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+    };
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     React Bits · SpotlightCard
+     reactbits.dev/r/SpotlightCard-JS-CSS.json — no deps.
+     The whole component is one handler writing two custom
+     properties; the gradient that reads them lives in the sheet.
+     ══════════════════════════════════════════════════════════ */
+  const initSpotlight = el => {
+    el.addEventListener('pointermove', ({ clientX, clientY }) => {
+      const { left, top } = el.getBoundingClientRect();
+      el.style.setProperty('--mouse-x', `${clientX - left}px`);
+      el.style.setProperty('--mouse-y', `${clientY - top}px`);
+    }, { passive: true });
+  };
+
+  /* ══════════════════════════════════════════════════════════
+     React Bits · Magnet
+     reactbits.dev/r/Magnet-JS-CSS.json — no deps.
+     One change with a reason: the React version adds a window
+     mousemove listener per instance. Nine buttons would mean
+     nine listeners doing the same arithmetic, so the pointer is
+     read once here and every registered magnet is measured
+     against it. The maths is the library's, line for line.
+     ══════════════════════════════════════════════════════════ */
+  const magnets = [];
+
+  const initMagnet = (el, { padding = 100, magnetStrength = 2 } = {}) => {
+    magnets.push({ wrap: el, inner: el.querySelector('.magnet-inner'), padding, strength: magnetStrength });
+  };
+
+  const armMagnets = () => {
+    if (!magnets.length) return;
+
+    window.addEventListener('pointermove', ({ clientX, clientY }) => {
+      for (const { wrap, inner, padding, strength } of magnets) {
+        if (!inner) continue;
+
+        const r = wrap.getBoundingClientRect();
+        const centerX = r.left + r.width / 2;
+        const centerY = r.top + r.height / 2;
+
+        if (Math.abs(centerX - clientX) < r.width / 2 + padding &&
+            Math.abs(centerY - clientY) < r.height / 2 + padding) {
+          wrap.classList.add('is-pulled');
+          inner.style.transform =
+            `translate3d(${(clientX - centerX) / strength}px, ${(clientY - centerY) / strength}px, 0)`;
+        } else if (wrap.classList.contains('is-pulled')) {
+          wrap.classList.remove('is-pulled');
+          inner.style.transform = 'translate3d(0,0,0)';
+        }
+      }
+    }, { passive: true });
+  };
+
+  /* ══════════════════════════════════════════════════════════
+     React Bits · StarBorder and GlareHover need no JavaScript.
+     Both are markup plus a keyframe / a background-position
+     transition; their JSX only ever spread props into style
+     variables, and those are written straight into the markup.
+     ══════════════════════════════════════════════════════════ */
+
+  /* ══════════════════════════════════════════════════════════
+     The theme's own, ported from assets/js/tod.js
+     ══════════════════════════════════════════════════════════ */
+
+  /* characters flicker on like neon tubes */
+  const initSplit = () => {
+    const els = document.querySelectorAll('.split');
+    if (!els.length) return;
+
+    for (const el of els) {
+      const text = el.textContent;
+      el.setAttribute('aria-label', text);
+      el.textContent = '';
+      /* Words first, characters only inside them. Every char is an
+         inline-block, and a line may break between any two inline boxes -
+         so a flat list of characters lets "SEE YOU AT SUNRISE" break as
+         "SEE YOU A / T SUNRISE". Wrapping each word in a nowrap box puts
+         the only legal break back where it belongs: between words. */
+      let i = 0;
+      for (const chunk of text.split(/(\s+)/)) {
+        if (!chunk) continue;
+        if (/^\s+$/.test(chunk)) {
+          el.append(chunk);
+          continue;
+        }
+        const word = document.createElement('span');
+        word.className = 'word';
+        word.setAttribute('aria-hidden', 'true');
+        for (const ch of chunk) {
+          const span = document.createElement('span');
+          span.className = 'char';
+          span.style.setProperty('--i', i++);
+          span.textContent = ch;
+          word.append(span);
+        }
+        el.append(word);
+      }
+    }
+
+    const io = new IntersectionObserver(entries => {
+      for (const { target, isIntersecting } of entries) {
+        if (!isIntersecting) continue;
+        target.classList.add('is-on');
+        io.unobserve(target);
+      }
+    }, { threshold: 0.6 });
+
+    for (const el of els) io.observe(el);
+  };
+
+  /* fade + rise when scrolled into view */
+  const initReveal = () => {
+    const els = document.querySelectorAll('.reveal');
+    if (!els.length) return;
+
+    const io = new IntersectionObserver(entries => {
+      for (const { target, isIntersecting } of entries) {
+        if (!isIntersecting) continue;
+        target.classList.add('is-in');
+        io.unobserve(target);
+      }
+      /* threshold 0 with a bottom margin, not a ratio: the gallery is
+         taller than the viewport on a phone (4027px against 844px), so
+         its intersection ratio tops out around 0.21 and a 0.15 ratio
+         needs 604px of it on screen before anything appears. An element
+         cannot be asked for a percentage of itself when it is bigger
+         than the window - fire when its top edge arrives instead. */
+    }, { threshold: 0, rootMargin: '0px 0px -10% 0px' });
+
+    for (const el of els) io.observe(el);
+  };
+
+  /* 3D tilt following the pointer, with glare */
+  const initTilt = () => {
+    const MAX_TILT = 9;
+
+    for (const el of document.querySelectorAll('.tilt')) {
+      if (!el.querySelector('.tilt-glare')) {
+        const glare = document.createElement('span');
+        glare.className = 'tilt-glare';
+        glare.setAttribute('aria-hidden', 'true');
+        el.append(glare);
+      }
+
+      el.addEventListener('pointermove', ({ clientX, clientY }) => {
+        const { left, top, width, height } = el.getBoundingClientRect();
+        const px = (clientX - left) / width;
+        const py = (clientY - top) / height;
+        el.style.setProperty('--rx', `${((0.5 - py) * 2 * MAX_TILT).toFixed(2)}deg`);
+        el.style.setProperty('--ry', `${((px - 0.5) * 2 * MAX_TILT).toFixed(2)}deg`);
+        el.style.setProperty('--gx', `${(px * 100).toFixed(1)}%`);
+        el.style.setProperty('--gy', `${(py * 100).toFixed(1)}%`);
+      }, { passive: true });
+
+      el.addEventListener('pointerleave', () => {
+        el.style.setProperty('--rx', '0deg');
+        el.style.setProperty('--ry', '0deg');
+        el.style.setProperty('--gx', '50%');
+        el.style.setProperty('--gy', '50%');
+      });
+    }
+  };
+
+  /* --- the touch stand-ins for GlareHover and SpotlightCard ------
+     Only mounted where there is no pointer; see the mount below. */
+
+  /* the sheen sweeps while a photo is on screen, at any scroll speed */
+  const initTouchGlare = () => {
+    const els = document.querySelectorAll('.glare');
+    if (!els.length) return;
+
+    /* threshold 0: a fling can carry a tile through the viewport without
+       it ever registering as 12% visible at a sampled frame, which is
+       exactly how the one-shot version managed to fire on none of
+       fifteen tiles. Any intersection at all is enough. */
+    const io = new IntersectionObserver(entries => {
+      for (const { target, isIntersecting } of entries) {
+        target.classList.toggle('is-swept', isIntersecting);
+      }
+    }, { threshold: 0, rootMargin: '10% 0px' });
+
+    els.forEach((el, i) => {
+      /* offset the loops so a grid moves like a wave, not a pulse */
+      el.style.setProperty('--glare-delay', `${(i % 3) * 0.45}s`);
+      io.observe(el);
+    });
+  };
+
+  /* cards in view keep a soft glow; it fades as they leave */
+  const initTouchSpotlight = () => {
+    const els = document.querySelectorAll('[data-spotlight]');
+    if (!els.length) return;
+
+    const io = new IntersectionObserver(entries => {
+      for (const { target, isIntersecting } of entries) {
+        target.classList.toggle('is-lit', isIntersecting);
+      }
+    }, { threshold: 0.25 });
+
+    for (const el of els) io.observe(el);
+  };
+
+  /* The fluid, penned into a section instead of the viewport. Same
+     ported component; a lower dye resolution because it is painting a
+     phone rather than a desktop, and AUTO_SPLAT_MS because there is no
+     pointer here to splash it. */
+  const initSectionFluid = () => {
+    for (const host of document.querySelectorAll('.fluid-bed')) {
+      if (host.querySelector('canvas')) continue;
+      const canvas = document.createElement('canvas');
+      canvas.setAttribute('aria-hidden', 'true');
+      host.appendChild(canvas);
+      let sim;
+      try {
+        sim = initSplashCursor(canvas, {
+          SIM_RESOLUTION: 128,
+          DYE_RESOLUTION: 512,
+          DENSITY_DISSIPATION: 2.2,
+          VELOCITY_DISSIPATION: 1.6,
+          PRESSURE: 0.1,
+          CURL: 3,
+          SPLAT_RADIUS: 0.25,
+          SPLAT_FORCE: 6000,
+          COLOR_UPDATE_SPEED: 14,
+          AUTO_SPLAT_MS: 900
+        });
+      } catch {
+        canvas.remove();            /* no WebGL: leave the section plain */
+        continue;
+      }
+
+      /* Off screen is off. Each bed is its own WebGL context and its own
+         rAF; without this, every section ever given one would paint
+         continuously for a phone that is only ever showing one of them. */
+      sim.pause();
+      new IntersectionObserver(entries => {
+        for (const { isIntersecting } of entries) {
+          isIntersecting ? sim.resume() : sim.pause();
+        }
+      }, { rootMargin: '10% 0px' }).observe(host);
+    }
+  };
+
+  /* Spores - ambient particles drifting up through the hero.
+     Straight port of the theme's assets/js/tod.js, which is itself a
+     port of t2's Spores.jsx; the default colours ARE the pink night.
+
+     Mounted only where the fluid is not. On a cursor device the
+     SplashCursor is the atmosphere and running both is soup - but a
+     phone has no fluid, which left the hero with lasers and glow and
+     nothing adrift in it. This is the layer that hole was shaped for,
+     and it stays in the header, where an ambient effect belongs. */
+  const initSpores = () => {
+    const COLORS = ['#ff3ecf', '#37f5e0', '#8a5cff', '#b8ff2e', '#f0e9ff'];
+
+    for (const host of document.querySelectorAll('.atmo')) {
+      if (host.querySelector('canvas')) continue;
+
+      const canvas = document.createElement('canvas');
+      canvas.setAttribute('aria-hidden', 'true');
+      host.append(canvas);
+
+      const ctx = canvas.getContext('2d');
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      let W = 0;
+      let H = 0;
+      let spores = [];
+      let raf = 0;
+      let running = true;
+
+      const makeSpore = fresh => ({
+        x: Math.random() * W,
+        y: fresh ? H + 10 : Math.random() * H,
+        r: 0.8 + Math.random() * 2.2,
+        vy: 0.15 + Math.random() * 0.45,
+        sway: Math.random() * Math.PI * 2,
+        swaySpeed: 0.004 + Math.random() * 0.01,
+        swayAmp: 0.3 + Math.random() * 0.7,
+        color: COLORS[(Math.random() * COLORS.length) | 0],
+        alpha: 0.25 + Math.random() * 0.55
+      });
+
+      const resize = () => {
+        W = host.clientWidth;
+        H = host.clientHeight;
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const count = Math.min(90, Math.max(35, (W * H) / 22000));
+        spores = Array.from({ length: count }, () => makeSpore(false));
+      };
+
+      const frame = () => {
+        if (!running) return;
+        ctx.clearRect(0, 0, W, H);
+        for (const [i, sp] of spores.entries()) {
+          sp.y -= sp.vy;
+          sp.sway += sp.swaySpeed;
+          sp.x += Math.sin(sp.sway) * sp.swayAmp * 0.4;
+          if (sp.y < -12) spores[i] = makeSpore(true);
+
+          const s = spores[i];
+          ctx.globalAlpha = s.alpha;
+          ctx.fillStyle = s.color;
+          ctx.shadowColor = s.color;
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
+        raf = requestAnimationFrame(frame);
+      };
+
+      const onVisibility = () => {
+        const wasRunning = running;
+        running = !document.hidden;
+        if (running && !wasRunning) raf = requestAnimationFrame(frame);
+      };
+
+      resize();
+      raf = requestAnimationFrame(frame);
+      addEventListener('resize', resize);
+      document.addEventListener('visibilitychange', onVisibility);
+    }
+  };
+
+  /* the logo's equalizer, alive */
+  const initWave = () => {
+    const HEIGHTS = [8, 16, 24, 12, 20, 26, 10, 22];
+
+    for (const el of document.querySelectorAll('.wave')) {
+      if (el.children.length) continue;
+      el.setAttribute('aria-hidden', 'true');
+      el.append(...HEIGHTS.map((h, i) => {
+        const bar = document.createElement('i');
+        bar.style.setProperty('--h', `${h}px`);
+        bar.style.setProperty('--d', `${1.1 + (i % 5) * 0.14}s`);
+        bar.style.setProperty('--dl', `${i * 0.08}s`);
+        return bar;
+      }));
+    }
+  };
+
+  /* ══════════════════════════════════════════════════════════
+     Mount
+     ══════════════════════════════════════════════════════════ */
+  ready(function () {
+    /* Everything below the fold is visible and still without JS,
+       and stays that way under reduced motion: the class the
+       hiding rules hang off is only ever added here. */
+    if (!REDUCED) document.documentElement.classList.add('g4-js');
+
+    initWave();
+
+    for (const el of document.querySelectorAll('[data-spotlight]')) initSpotlight(el);
+
+    if (REDUCED) {
+      /* No fluid, no grain, no magnet. The night stands still. */
+      return;
+    }
+
+    initSplit();
+    initReveal();
+    initTilt();
+
+    if (!HAS_CURSOR) {
+      initSpores();          /* the hero's atmosphere, where the fluid is not */
+      initSectionFluid();    /* the same fluid, penned into one section */
+      initTouchGlare();
+      initTouchSpotlight();
+      return;
+    }
+
+    for (const el of document.querySelectorAll('[data-magnet]')) {
+      initMagnet(el, {
+        padding: Number(el.dataset.magnetPadding) || 100,
+        magnetStrength: Number(el.dataset.magnetStrength) || 2
+      });
+    }
+    armMagnets();
+
+    initNoise(document.getElementById('grain'), { patternAlpha: 12 });
+
+    /* The parameters from the Background Studio, as given. */
+    initSplashCursor(document.getElementById('fluid'), {
+      SIM_RESOLUTION: 128,
+      DYE_RESOLUTION: 1440,
+      DENSITY_DISSIPATION: 3.5,
+      VELOCITY_DISSIPATION: 2,
+      PRESSURE: 0.1,
+      CURL: 3,
+      SPLAT_RADIUS: 0.2,
+      SPLAT_FORCE: 6000,
+      COLOR_UPDATE_SPEED: 14
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
