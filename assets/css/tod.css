@@ -749,9 +749,13 @@ h1, h2, h3 { text-wrap: balance; }
 /* neon flicker-on, character by character (SplitText) */
 .tod-split { display: inline-block; }
 
+html.tod-js .tod-split .tod-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
 html.tod-js .tod-split .tod-char {
   display: inline-block;
-  white-space: pre;
   opacity: 0;
 }
 
