@@ -32,12 +32,25 @@ function tod_pink_divi_enqueue() {
 	wp_enqueue_style( 'tod-pink-fonts', get_stylesheet_directory_uri() . '/assets/css/fonts.css', array(), TOD_PINK_DIVI_VERSION );
 	wp_enqueue_style( 'tod-pink-style', get_stylesheet_directory_uri() . '/assets/css/tod.css', array( 'tod-pink-fonts' ), TOD_PINK_DIVI_VERSION );
 	wp_enqueue_style( 'tod-pink-divi-glue', get_stylesheet_directory_uri() . '/assets/css/divi-glue.css', array( 'tod-pink-style' ), TOD_PINK_DIVI_VERSION );
+	wp_enqueue_style( 'tod-pink-g4-night', get_stylesheet_directory_uri() . '/assets/css/g4-night.css', array( 'tod-pink-divi-glue' ), TOD_PINK_DIVI_VERSION );
 
 	if ( ! tod_pink_divi_in_builder() ) {
+		/* g4-night.js goes FIRST, and the order is load-bearing. On a
+		   cursor device the fluid is the atmosphere, so this script
+		   removes the .tod-atmo host at parse time; tod.js then finds
+		   nothing and never starts a second particle layer. Both are
+		   deferred, so they run in document order. */
+		wp_enqueue_script(
+			'tod-pink-g4-night',
+			get_stylesheet_directory_uri() . '/assets/js/g4-night.js',
+			array(),
+			TOD_PINK_DIVI_VERSION,
+			array( 'strategy' => 'defer', 'in_footer' => true )
+		);
 		wp_enqueue_script(
 			'tod-pink-effects',
 			get_stylesheet_directory_uri() . '/assets/js/tod.js',
-			array(),
+			array( 'tod-pink-g4-night' ),
 			TOD_PINK_DIVI_VERSION,
 			array( 'strategy' => 'defer', 'in_footer' => true )
 		);
