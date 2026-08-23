@@ -137,6 +137,11 @@ CSS_TAIL = """
 
 /* gallery tiles become GlareHover tiles */
 .h-gallery-divi .g4-tile{ position:relative; overflow:hidden; }
+
+/* .spotlight brings a card's padding with it; tod.css already gave the
+   date row its own, so hand it back. .spotlight-row covers the rest
+   (background, border, radius). */
+.tod-date.spotlight{ padding:1rem .2rem; }
 """
 
 
@@ -188,6 +193,13 @@ JS_MOUNT = r"""
     /* the hover-driven pieces, on the modules Divi gives them to */
     for (const n of document.querySelectorAll('.h-set')) {
       n.classList.add('spotlight');
+      n.setAttribute('data-spotlight', '');
+    }
+
+    /* Date rows get the flat variant: same pointer glow, but no card
+       background, border or radius - .tod-date already has its own. */
+    for (const n of document.querySelectorAll('.tod-date')) {
+      n.classList.add('spotlight', 'spotlight-row');
       n.setAttribute('data-spotlight', '');
     }
     /* Divi names gallery items itself and the name is version-shaped,

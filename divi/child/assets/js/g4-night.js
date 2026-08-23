@@ -1511,6 +1511,13 @@ function initSplashCursor(canvas, options) {
       n.classList.add('spotlight');
       n.setAttribute('data-spotlight', '');
     }
+
+    /* Date rows get the flat variant: same pointer glow, but no card
+       background, border or radius - .tod-date already has its own. */
+    for (const n of document.querySelectorAll('.tod-date')) {
+      n.classList.add('spotlight', 'spotlight-row');
+      n.setAttribute('data-spotlight', '');
+    }
     /* Divi names gallery items itself and the name is version-shaped,
        so match loosely and fall back to whatever wraps the images. */
     const gal = document.querySelector('.h-gallery-divi');

@@ -181,3 +181,8 @@
 
 /* gallery tiles become GlareHover tiles */
 .h-gallery-divi .g4-tile{ position:relative; overflow:hidden; }
+
+/* .spotlight brings a card's padding with it; tod.css already gave the
+   date row its own, so hand it back. .spotlight-row covers the rest
+   (background, border, radius). */
+.tod-date.spotlight{ padding:1rem .2rem; }
