@@ -24,15 +24,15 @@ JS   : the component functions, verbatim - initSplashCursor (the ported
 CSS  : only the effect rules. Everything that styles the page itself
        (hero, sections, cards, type) is tod.css's job on a Divi site.
 
-The one interaction worth knowing
----------------------------------
-tod.js starts spores on every device. The fluid is the atmosphere on a
-cursor device and running both is soup, so the Divi mount removes the
-.tod-atmo host outright when there is a cursor - synchronously, at parse
-time. This file is enqueued BEFORE tod.js, so by the time tod.js looks
-for .tod-atmo there is nothing to find and initSpores never starts. No
-edit to tod.js is needed, which matters: tod.js is shared with the block
-theme edition and that one still wants its spores everywhere.
+Spores and fluid are both, not either
+-------------------------------------
+tod.js starts spores on every device and this file leaves them alone.
+They are ambient - drifting from load, asking for nothing. The fluid is
+reactive: it paints where a pointer goes and, with no pointer, paints
+nothing. Neither substitutes for the other, so a cursor device gets
+spores in the header AND the fluid across the page. (An earlier version
+deleted the .tod-atmo host when a cursor was present; that was an
+aesthetic call, not a technical one, and it was wrong.)
 
 Usage: python3 scripts/build-g4-divi.py
 """
@@ -170,7 +170,7 @@ JS_MOUNT = r"""
      titles, reveals, tilt, the equalizer - is left to tod.js.
      ================================================================== */
 
-  const BED_SECTIONS = ['story', 'contact'];
+  const BED_SECTIONS = ['story', 'sets', 'dates', 'contact'];
 
   const el = (tag, id, cls) => {
     const n = document.createElement(tag);
@@ -179,13 +179,6 @@ JS_MOUNT = r"""
     n.setAttribute('aria-hidden', 'true');
     return n;
   };
-
-  /* Runs at parse time, before tod.js. On a cursor device the fluid is
-     the atmosphere, so the spore host is removed here and tod.js's
-     initSpores finds nothing to start. On touch it is left alone. */
-  if (HAS_CURSOR && !REDUCED) {
-    for (const host of document.querySelectorAll('.tod-atmo')) host.remove();
-  }
 
   ready(function () {
     if (REDUCED) return;

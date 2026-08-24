@@ -1486,7 +1486,7 @@ function initSplashCursor(canvas, options) {
      titles, reveals, tilt, the equalizer - is left to tod.js.
      ================================================================== */
 
-  const BED_SECTIONS = ['story', 'contact'];
+  const BED_SECTIONS = ['story', 'sets', 'dates', 'contact'];
 
   const el = (tag, id, cls) => {
     const n = document.createElement(tag);
@@ -1495,13 +1495,6 @@ function initSplashCursor(canvas, options) {
     n.setAttribute('aria-hidden', 'true');
     return n;
   };
-
-  /* Runs at parse time, before tod.js. On a cursor device the fluid is
-     the atmosphere, so the spore host is removed here and tod.js's
-     initSpores finds nothing to start. On touch it is left alone. */
-  if (HAS_CURSOR && !REDUCED) {
-    for (const host of document.querySelectorAll('.tod-atmo')) host.remove();
-  }
 
   ready(function () {
     if (REDUCED) return;

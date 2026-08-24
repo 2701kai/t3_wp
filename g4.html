@@ -89,11 +89,13 @@
     and a card in view holds a soft glow. Same components, the only
     trigger a touch device can actually give them.
 
-    And where the fluid is switched off, the hero would otherwise have
-    nothing adrift in it - so the spores come back, ported from the
-    theme's tod.js, in the header only. One atmosphere per device:
-    fluid across the whole page for a cursor, spores in the header for
-    a thumb. Never both; that was always soup.
+    The spores, ported from the theme's tod.js, drift in the header on
+    every device. They are ambient - they move from the moment the page
+    loads and ask for nothing. The fluid is reactive: it paints where a
+    pointer goes and, without one, paints nothing at all. So they are
+    not alternatives and one cannot replace the other. A cursor gets
+    spores in the header and the fluid across the whole page; a thumb
+    gets spores and a bed of fluid in two sections.
 
   The nav links get their own row under 46rem rather than being
   hidden. The theme hides them there because WordPress supplies
@@ -256,6 +258,8 @@ h1,h2,h3{ text-wrap:balance; }
 .fluid-bed{ position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
 .fluid-bed canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
 #story > *:not(.fluid-bed),
+#sets > *:not(.fluid-bed),
+#dates > *:not(.fluid-bed),
 #contact > *:not(.fluid-bed){ position:relative; z-index:1; }
 
 /* spores drift up in here on touch devices - canvas injected by JS.
@@ -871,6 +875,7 @@ html.g4-js .tilt{ transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(v
 
   <!-- ========== SETS ========== -->
   <section class="section" id="sets">
+    <div class="fluid-bed" aria-hidden="true"></div>
     <div class="head reveal">
       <p class="kicker">The Sound</p>
       <h2 class="h2">Sets that carry <em>the night</em></h2>
@@ -908,6 +913,7 @@ html.g4-js .tilt{ transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(v
 
   <!-- ========== DATES ========== -->
   <section class="section" id="dates">
+    <div class="fluid-bed" aria-hidden="true"></div>
     <div class="head reveal">
       <p class="kicker">Dates</p>
       <h2 class="h2">Where the <em>dancing</em> is</h2>
@@ -2572,8 +2578,13 @@ function initSplashCursor(canvas, options) {
     initReveal();
     initTilt();
 
+    /* Spores drift on their own from the moment the page loads. The
+       fluid only paints where a pointer goes, so it is reactive, not
+       ambient - one cannot stand in for the other. Both, on every
+       device. */
+    initSpores();
+
     if (!HAS_CURSOR) {
-      initSpores();          /* the hero's atmosphere, where the fluid is not */
       initSectionFluid();    /* the same fluid, penned into one section */
       initTouchGlare();
       initTouchSpotlight();
